@@ -341,7 +341,7 @@
 <div class="card" id="card-bending" data-section="bending">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
-      <h2>Conduit Bending Quick Calculator (90&deg; Stub-Up, Offset &amp; 3-Point Saddle)</h2>
+      <h2>Conduit Bending Quick Calculator (90&deg; Stub, Offset, Rolling Offset, 3-Pt &amp; 4-Pt Saddle)</h2>
       <div class="sub">1/2&quot; through 2&quot; EMT &amp; Rigid (RMC) | Tape-measure 1/16&quot; fractions | Standard bender deducts + custom shoe override | NEC 358.26 / 344.26 (360&deg; max)</div>
     </div>
   </div>
@@ -381,7 +381,7 @@
     </label>
     <label title="Distance from conduit end to start of obstruction">Dist to Obstruction (in): <input id="cb-off-dist" class="in" type="number" step="0.5" min="0" value="24"></label>
   </div>
-  <div class="bar" style="margin-bottom:0;">
+  <div class="bar" style="margin-bottom:8px;">
     <span style="color:#d8b4fe;font-weight:600;">3-Point Saddle:</span>
     <label>Obstacle Height (in): <input id="cb-sad-rise" class="in" type="number" step="0.25" min="0" value="4"></label>
     <label>Angles:
@@ -391,6 +391,37 @@
       </select>
     </label>
     <label title="Distance from conduit end to center of obstruction">Dist to Center (in): <input id="cb-sad-dist" class="in" type="number" step="0.5" min="0" value="36"></label>
+  </div>
+  <div class="bar" style="margin-bottom:8px;">
+    <span style="color:#fcd34d;font-weight:600;">Rolling Offset:</span>
+    <label>Rise (in): <input id="cb-roll-rise" class="in" type="number" step="0.25" min="0" value="6"></label>
+    <label>Roll (in): <input id="cb-roll-horiz" class="in" type="number" step="0.25" min="0" value="8"></label>
+    <label>Angle:
+      <select id="cb-roll-ang" class="sel">
+        <option value="10">10&deg; (5.76x, 1/16&quot;/in)</option>
+        <option value="15">15&deg; (3.86x, 1/8&quot;/in)</option>
+        <option value="22.5">22.5&deg; (2.61x, 3/16&quot;/in)</option>
+        <option value="30" selected>30&deg; (2.00x, 1/4&quot;/in)</option>
+        <option value="45">45&deg; (1.41x, 3/8&quot;/in)</option>
+        <option value="60">60&deg; (1.15x, 1/2&quot;/in)</option>
+      </select>
+    </label>
+    <label title="Distance from conduit end to start of obstruction">Dist to Obstruction (in): <input id="cb-roll-dist" class="in" type="number" step="0.5" min="0" value="24"></label>
+  </div>
+  <div class="bar" style="margin-bottom:0;">
+    <span style="color:#f472b6;font-weight:600;">4-Point Saddle:</span>
+    <label>Obstacle Height (in): <input id="cb-s4-rise" class="in" type="number" step="0.25" min="0" value="4"></label>
+    <label>Obstacle Width (in): <input id="cb-s4-width" class="in" type="number" step="0.25" min="0" value="12"></label>
+    <label>Angle:
+      <select id="cb-s4-ang" class="sel">
+        <option value="10">10&deg; (5.76x, 40&deg; total)</option>
+        <option value="15">15&deg; (3.86x, 60&deg; total)</option>
+        <option value="22.5">22.5&deg; (2.61x, 90&deg; total)</option>
+        <option value="30" selected>30&deg; (2.00x, 120&deg; total)</option>
+        <option value="45">45&deg; (1.41x, 180&deg; total)</option>
+      </select>
+    </label>
+    <label title="Distance from conduit end to near (leading) edge of obstruction">Dist to Near Edge (in): <input id="cb-s4-dist" class="in" type="number" step="0.5" min="0" value="24"></label>
   </div>
   <div id="cb-formula" class="formula-strip purple mono"></div>
   <div id="cb-summary" class="grid-boxes"></div>
@@ -1180,7 +1211,8 @@
     saveQuickLookupLocal();
   }
 
-  var BEND_KEY = "nec_conduit_bending_v16";
+  var BEND_KEY = "nec_conduit_bending_v17";
+  var BEND_PREV_KEY = "nec_conduit_bending_v16";
 
   var BEND_DB = {
     EMT: {
@@ -1247,14 +1279,22 @@
         offDist: document.getElementById("cb-off-dist").value,
         sadRise: document.getElementById("cb-sad-rise").value,
         sadMode: document.getElementById("cb-sad-mode").value,
-        sadDist: document.getElementById("cb-sad-dist").value
+        sadDist: document.getElementById("cb-sad-dist").value,
+        rollRise: document.getElementById("cb-roll-rise").value,
+        rollHoriz: document.getElementById("cb-roll-horiz").value,
+        rollAng: document.getElementById("cb-roll-ang").value,
+        rollDist: document.getElementById("cb-roll-dist").value,
+        s4Rise: document.getElementById("cb-s4-rise").value,
+        s4Width: document.getElementById("cb-s4-width").value,
+        s4Ang: document.getElementById("cb-s4-ang").value,
+        s4Dist: document.getElementById("cb-s4-dist").value
       }));
     } catch (e) {}
   }
 
   function loadBendingLocal() {
     try {
-      var raw = localStorage.getItem(BEND_KEY);
+      var raw = localStorage.getItem(BEND_KEY) || localStorage.getItem(BEND_PREV_KEY);
       if (raw) {
         var b = JSON.parse(raw);
         if (b.type === "EMT" || b.type === "RIGID") document.getElementById("cb-type").value = b.type;
@@ -1267,6 +1307,14 @@
         if (b.sadRise !== undefined) document.getElementById("cb-sad-rise").value = String(b.sadRise);
         if (b.sadMode && SAD_DB[b.sadMode]) document.getElementById("cb-sad-mode").value = b.sadMode;
         if (b.sadDist !== undefined) document.getElementById("cb-sad-dist").value = String(b.sadDist);
+        if (b.rollRise !== undefined) document.getElementById("cb-roll-rise").value = String(b.rollRise);
+        if (b.rollHoriz !== undefined) document.getElementById("cb-roll-horiz").value = String(b.rollHoriz);
+        if (b.rollAng && OFF_ANG_DB[b.rollAng]) document.getElementById("cb-roll-ang").value = b.rollAng;
+        if (b.rollDist !== undefined) document.getElementById("cb-roll-dist").value = String(b.rollDist);
+        if (b.s4Rise !== undefined) document.getElementById("cb-s4-rise").value = String(b.s4Rise);
+        if (b.s4Width !== undefined) document.getElementById("cb-s4-width").value = String(b.s4Width);
+        if (b.s4Ang && OFF_ANG_DB[b.s4Ang]) document.getElementById("cb-s4-ang").value = b.s4Ang;
+        if (b.s4Dist !== undefined) document.getElementById("cb-s4-dist").value = String(b.s4Dist);
       }
     } catch (e) {}
   }
@@ -1282,6 +1330,7 @@
     var stubTooShort = stubMark < 0;
     var approxGain = (2.0 - (Math.PI / 2.0)) * spec.shoeR;
 
+    // 2-Bend Offset
     var offRise = Math.max(0, Number(document.getElementById("cb-off-rise").value || 0));
     var offKey = document.getElementById("cb-off-ang").value;
     var offSp = OFF_ANG_DB[offKey] || OFF_ANG_DB["30"];
@@ -1292,6 +1341,7 @@
     var offM2 = offM1 + offSpacing;
     var offExactShrink = offRise * Math.tan((offSp.deg * Math.PI / 180.0) / 2.0);
 
+    // 3-Point Saddle
     var sadRise = Math.max(0, Number(document.getElementById("cb-sad-rise").value || 0));
     var sadKey = document.getElementById("cb-sad-mode").value;
     var sadSp = SAD_DB[sadKey] || SAD_DB["45_22.5"];
@@ -1304,11 +1354,41 @@
     var sadOut2 = sadCtr + sadSpacing;
     var sadNeg = sadOut1 < 0;
 
+    // Rolling Offset
+    var rRise = Math.max(0, Number(document.getElementById("cb-roll-rise").value || 0));
+    var rHoriz = Math.max(0, Number(document.getElementById("cb-roll-horiz").value || 0));
+    var rTrue = Math.sqrt((rRise * rRise) + (rHoriz * rHoriz));
+    var rPlaneDeg = rTrue > 0 ? (Math.atan2(rRise, rHoriz) * 180.0 / Math.PI) : 0.0;
+    var rKey = document.getElementById("cb-roll-ang").value;
+    var rSp = OFF_ANG_DB[rKey] || OFF_ANG_DB["30"];
+    var rDist = Math.max(0, Number(document.getElementById("cb-roll-dist").value || 0));
+    var rSpacing = rTrue * rSp.mult;
+    var rShrink = rTrue * rSp.shrinkIn;
+    var rM1 = rDist + rShrink;
+    var rM2 = rM1 + rSpacing;
+
+    // 4-Point Saddle
+    var s4Rise = Math.max(0, Number(document.getElementById("cb-s4-rise").value || 0));
+    var s4Width = Math.max(0, Number(document.getElementById("cb-s4-width").value || 0));
+    var s4Key = document.getElementById("cb-s4-ang").value;
+    var s4Sp = OFF_ANG_DB[s4Key] || OFF_ANG_DB["30"];
+    var s4Dist = Math.max(0, Number(document.getElementById("cb-s4-dist").value || 0));
+    var s4Leg = s4Rise * s4Sp.mult;
+    var s4Shrink = s4Rise * s4Sp.shrinkIn;
+    var s4TotalLoss = 2.0 * s4Shrink;
+    var s4M2 = s4Dist + s4Shrink;
+    var s4M1 = s4M2 - s4Leg;
+    var s4M3 = s4M2 + s4Width;
+    var s4M4 = s4M3 + s4Leg;
+    var s4TotDeg = 4.0 * s4Sp.deg;
+    var s4Neg = s4M1 < 0;
+
     var typeLbl = ctype === "RIGID" ? "Rigid RMC" : "EMT";
     document.getElementById("cb-formula").textContent =
-      "90 STUB [" + sz + " " + typeLbl + "]: Mark @ " + toFrac16(stubMark) + " (" + stubIn + '" - ' + deduct + '" deduct)  |  ' +
-      "OFFSET [" + offRise + '" @ ' + offSp.deg + " deg]: Space " + toFrac16(offSpacing) + " | Shrink " + toFrac16(offShrink) + " (Marks: " + toFrac16(offM1) + " & " + toFrac16(offM2) + ")  |  " +
-      "3-PT SADDLE [" + sadRise + '" @ ' + sadSp.ctr + "/" + sadSp.out + " deg]: " + toFrac16(sadOut1) + " | " + toFrac16(sadCtr) + " (Ctr) | " + toFrac16(sadOut2);
+      "90 STUB [" + sz + " " + typeLbl + "]: " + toFrac16(stubMark) + "  |  " +
+      "OFFSET [" + offRise + '"@' + offSp.deg + "deg]: " + toFrac16(offM1) + " & " + toFrac16(offM2) + "  |  " +
+      "ROLLING [" + rRise + '"R+' + rHoriz + '"H -> ' + toFrac16(rTrue) + " true @" + rSp.deg + "deg]: " + toFrac16(rM1) + " & " + toFrac16(rM2) + "  |  " +
+      "4-PT SADDLE [" + s4Rise + '"x' + s4Width + '"@' + s4Sp.deg + "deg]: " + toFrac16(s4M1) + " | " + toFrac16(s4M2) + " | " + toFrac16(s4M3) + " | " + toFrac16(s4M4);
 
     buildStatCards(document.getElementById("cb-summary"), [
       {
@@ -1346,6 +1426,30 @@
         val: toFrac16(sadOut1) + '  |  ' + toFrac16(sadCtr) + ' (Ctr)  |  ' + toFrac16(sadOut2),
         sub: sadNeg ? 'Outer Mark 1 is negative - increase distance to obstacle center' : ('Bend ' + sadSp.ctr + ' deg at Ctr (notch), then ' + sadSp.out + ' deg at Outers (arrow)'),
         cls: sadNeg ? "pill-hi" : "pill-c"
+      },
+      {
+        lbl: 'Rolling Offset True Offset & Travel (' + rSp.deg + ' deg)',
+        val: 'True: ' + toFrac16(rTrue) + '  |  Space: ' + toFrac16(rSpacing),
+        sub: 'sqrt(' + rRise + '^2 + ' + rHoriz + '^2) = ' + rTrue.toFixed(2) + '" | Roll Plane: ' + rPlaneDeg.toFixed(1) + ' deg | ' + (rSp.deg * 2) + ' deg total',
+        cls: "pill-m"
+      },
+      {
+        lbl: 'Rolling Offset Shrinkage & Marks (From End)',
+        val: 'M1: ' + toFrac16(rM1) + '  |  M2: ' + toFrac16(rM2),
+        sub: 'Shrink: ' + toFrac16(rShrink) + ' (' + rSp.shrinkLbl + '/in on true offset) added to ' + toFrac16(rDist),
+        cls: "pill-m"
+      },
+      {
+        lbl: '4-Point Saddle Leg Spacing & Shrink (' + s4Sp.deg + ' deg)',
+        val: 'Leg: ' + toFrac16(s4Leg) + '  |  Top: ' + toFrac16(s4Width),
+        sub: 'Front Shrink: +' + toFrac16(s4Shrink) + ' | Total Pipe Loss: ' + toFrac16(s4TotalLoss) + ' | Uses ' + s4TotDeg + ' deg (' + Math.round((s4TotDeg / 360) * 100) + '% of 360 deg)',
+        cls: "pill-c"
+      },
+      {
+        lbl: '4-Point Saddle Marks From End (M1 | M2 | M3 | M4)',
+        val: toFrac16(s4M1) + ' | ' + toFrac16(s4M2) + ' | ' + toFrac16(s4M3) + ' | ' + toFrac16(s4M4),
+        sub: s4Neg ? 'Mark 1 is negative - increase Dist to Near Edge above ' + toFrac16(s4Leg - s4Shrink) : ('Bend ' + s4Sp.deg + ' deg opposing offsets: M1-M2 up, M3-M4 back down'),
+        cls: s4Neg ? "pill-hi" : "pill-c"
       }
     ]);
 
@@ -2129,7 +2233,7 @@
 
   loadQuickLookupLocal();
 
-  ["cb-type","cb-size","cb-stub","cb-deduct-ovr","cb-off-rise","cb-off-ang","cb-off-dist","cb-sad-rise","cb-sad-mode","cb-sad-dist"].forEach(function(id){
+  ["cb-type","cb-size","cb-stub","cb-deduct-ovr","cb-off-rise","cb-off-ang","cb-off-dist","cb-sad-rise","cb-sad-mode","cb-sad-dist","cb-roll-rise","cb-roll-horiz","cb-roll-ang","cb-roll-dist","cb-s4-rise","cb-s4-width","cb-s4-ang","cb-s4-dist"].forEach(function(id){
     var el = document.getElementById(id);
     if (el) {
       el.onchange = renderConduitBending;
