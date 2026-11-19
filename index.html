@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>NEC Multi-Topology, Motor HP &amp; Feeder Schedule (430.24 / 430.62)</title>
+<title>NEC Schedule, Feeder (430.24/62) &amp; Transformer (450.3(B)) Calculator</title>
 <style>
   :root { --bg:#0f172a; --panel:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; }
   * { box-sizing:border-box; }
@@ -31,7 +31,7 @@
   th, td { padding:7px 8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
   th { color:var(--muted); background:rgba(15,23,42,0.75); }
   input.in, select.sel { background:#0f172a; color:var(--text); border:1px solid #475569; border-radius:4px; padding:4px 6px; font-size:12px; }
-  input.in { width:64px; }
+  input.in { width:68px; }
   input.desc { background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:4px; padding:4px 6px; font-size:12px; width:168px; }
   .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
   .pill-w { background:rgba(56,189,248,0.16); color:#7dd3fc; border:1px solid rgba(56,189,248,0.35); padding:2px 6px; border-radius:4px; font-weight:600; }
@@ -46,6 +46,7 @@
   .stat-val { font-size:14px; font-weight:700; color:#f8fafc; }
   .stat-sub { font-size:11px; color:#94a3b8; margin-top:4px; }
   .formula-strip { background:#0f172a; border:1px solid #334155; border-left:3px solid #38bdf8; border-radius:6px; padding:8px 12px; margin-top:10px; font-size:12px; color:#cbd5e1; line-height:1.5; }
+  .formula-strip.amber { border-left-color:#f59e0b; }
   @media (max-width: 768px) {
     body { padding:12px 10px; }
     h1 { font-size:16px; }
@@ -63,8 +64,8 @@
 <body>
 <header>
   <div>
-    <h1>NEC Article 220/424/430 Conductor, Motor HP, Feeder &amp; Shared Raceway Schedule</h1>
-    <div class="sub">3P/480V, 3P/240V, 1P/240V, 1P/120V &amp; 250VDC | Motor HP (430.250/248/247) | Feeder (430.24 / 430.62) | Cu/Al | 250.122 EGC | AB &amp; SqD</div>
+    <h1>NEC Article 220/424/430/450 Schedule, Feeder &amp; Transformer Sizing Suite</h1>
+    <div class="sub">3P/480V, 3P/240V, 1P/240V, 1P/120V &amp; 250VDC | Motor HP (430.250/248/247) | Feeder (430.24/62) | Transformer (450.3(B)) | Cu/Al | 250.122 &amp; 250.102</div>
   </div>
   <div class="btn-row">
     <button id="btn-install" class="install">Install App</button>
@@ -165,6 +166,60 @@
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
+      <h2>3-Phase / 1-Phase Step-Down &amp; Control Transformer Sizing (NEC Table 450.3(B))</h2>
+      <div class="sub">Calculates primary/secondary FLA, 125%/167%/250%/300% OCPD (&le;1000V), Class CC control fuses, primary EGC (250.122), and secondary GEC/SBJ (250.102(C)(1)).</div>
+    </div>
+    <div class="bar" style="margin-bottom:0;">
+      <label>Preset:
+        <select id="xfmr-preset" class="sel">
+          <option value="">Custom</option>
+          <option value="3,45,kVA,480,208,pri_sec">45 kVA 3P 480V -> 208Y/120V</option>
+          <option value="3,75,kVA,480,208,pri_sec">75 kVA 3P 480V -> 208Y/120V</option>
+          <option value="3,112.5,kVA,480,208,pri_sec">112.5 kVA 3P 480V -> 208Y/120V</option>
+          <option value="3,15,kVA,480,208,pri_sec">15 kVA 3P 480V -> 208Y/120V</option>
+          <option value="1,10,kVA,480,240,pri_sec">10 kVA 1P 480V -> 120/240V</option>
+          <option value="1,1000,VA,480,120,pri_sec">1000 VA 1P 480V -> 120V Control</option>
+          <option value="1,500,VA,480,120,pri_only">500 VA 1P 480V -> 120V Control</option>
+          <option value="1,250,VA,480,120,pri_only">250 VA 1P 480V -> 120V Control</option>
+          <option value="1,150,VA,480,24,pri_only">150 VA 1P 480V -> 24VAC Control</option>
+        </select>
+      </label>
+      <label>Phase:
+        <select id="xfmr-ph" class="sel">
+          <option value="3">3-Phase</option>
+          <option value="1">1-Phase</option>
+        </select>
+      </label>
+      <label>Size:
+        <input id="xfmr-val" class="in" type="number" step="any" value="45">
+        <select id="xfmr-unit" class="sel">
+          <option value="kVA">kVA</option>
+          <option value="VA">VA</option>
+        </select>
+      </label>
+      <label>Pri V: <input id="xfmr-vpri" class="in" type="number" value="480"></label>
+      <label>Sec V: <input id="xfmr-vsec" class="in" type="number" value="208"></label>
+      <label>Protection:
+        <select id="xfmr-scheme" class="sel">
+          <option value="pri_sec">Pri + Sec (250% / 125%-167%)</option>
+          <option value="pri_only">Primary Only (125% / 167% / 300%)</option>
+        </select>
+      </label>
+      <label>Mat:
+        <select id="xfmr-mat" class="sel">
+          <option value="CU">Cu</option>
+          <option value="AL">Al</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div id="xfmr-formula" class="formula-strip amber mono"></div>
+  <div id="xfmr-summary" class="grid-boxes"></div>
+</div>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
       <h2>Shared Multi-Circuit Conduit Fill Calculator (NEC Ch. 9, 250.122(C) &amp; 310.15(C)(1))</h2>
       <div class="sub">Check any rows in the <b>Raceway</b> column above to bundle their phase conductors plus one single shared EGC sized to the largest OCPD.</div>
     </div>
@@ -183,8 +238,8 @@
 
 <script>
 (function() {
-  var STORAGE_KEY = "nec_standalone_schedule_v7";
-  var PREV_STORAGE_KEY = "nec_standalone_schedule_v6";
+  var STORAGE_KEY = "nec_standalone_schedule_v8";
+  var PREV_KEYS = ["nec_standalone_schedule_v7", "nec_standalone_schedule_v6"];
 
   var DEFAULT_ROWS = [
     { ref:"L1", name:"3P/480V 10 HP Blower Motor", topology:"3P/480VAC", motor_hp:"10", material:"CU", in_raceway:true,  kw:7.46,  length_ft:125.0, continuous:true },
@@ -196,15 +251,16 @@
 
   function cloneDefaults() {
     var out = [];
-    for (var i = 0; i < DEFAULT_ROWS.length; i++) {
-      out.push(Object.assign({}, DEFAULT_ROWS[i]));
-    }
+    for (var i = 0; i < DEFAULT_ROWS.length; i++) out.push(Object.assign({}, DEFAULT_ROWS[i]));
     return out;
   }
 
   var ROWS = cloneDefaults();
   try {
-    var saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(PREV_STORAGE_KEY);
+    var saved = localStorage.getItem(STORAGE_KEY);
+    for (var pk = 0; pk < PREV_KEYS.length && (saved === null || saved === ""); pk++) {
+      saved = localStorage.getItem(PREV_KEYS[pk]);
+    }
     if (saved) {
       var parsedSaved = JSON.parse(saved);
       if (Array.isArray(parsedSaved) && parsedSaved.length > 0) ROWS = parsedSaved;
@@ -260,7 +316,9 @@
     { awg:"750 kcmil", cu60:400, cu75:475, cu90:535, al60:320, al75:385, al90:435, cmil:750000, rCu:0.021, rAl:0.029, xL:0.038, area:1.0496 }
   ];
 
-  var STD_OCPD = [15,20,25,30,35,40,45,50,60,70,80,90,100,110,125,150,175,200,225,250,300,350,400,450,500,600,700,800,1000,1200,1600,2000];
+  var STD_OCPD = [15,20,25,30,35,40,45,50,60,70,80,90,100,110,125,150,175,200,225,250,300,350,400,450,500,600,700,800,1000,1200,1600,2000,2500,3000,4000];
+  var STD_XFMR_OCPD = [1,3,6,10].concat(STD_OCPD);
+  var CLASS_CC = [0.25,0.5,0.75,1,1.25,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,12,15,20,25,30];
 
   var NEC_250_122 = [
     { max:15,   cu:"14 AWG",    al:"12 AWG" },
@@ -276,7 +334,19 @@
     { max:1000, cu:"2/0 AWG",   al:"4/0 AWG" },
     { max:1200, cu:"3/0 AWG",   al:"250 kcmil" },
     { max:1600, cu:"4/0 AWG",   al:"350 kcmil" },
-    { max:2000, cu:"250 kcmil", al:"400 kcmil" }
+    { max:2000, cu:"250 kcmil", al:"400 kcmil" },
+    { max:2500, cu:"350 kcmil", al:"600 kcmil" },
+    { max:3000, cu:"400 kcmil", al:"600 kcmil" },
+    { max:4000, cu:"500 kcmil", al:"750 kcmil" }
+  ];
+
+  var NEC_250_102 = [
+    { maxCu:66360,   maxAl:105600,  cu:"8 AWG",   al:"6 AWG" },
+    { maxCu:105600,  maxAl:167800,  cu:"6 AWG",   al:"4 AWG" },
+    { maxCu:167800,  maxAl:250000,  cu:"4 AWG",   al:"2 AWG" },
+    { maxCu:350000,  maxAl:500000,  cu:"2 AWG",   al:"1/0 AWG" },
+    { maxCu:600000,  maxAl:900000,  cu:"1/0 AWG", al:"3/0 AWG" },
+    { maxCu:1100000, maxAl:1750000, cu:"2/0 AWG", al:"4/0 AWG" }
   ];
 
   var COND_TBLS = {
@@ -327,19 +397,14 @@
   function saveState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ROWS)); } catch (e) {}
   }
-
   function k90Factor(c) {
     if (c <= 25) return 1.04; if (c <= 30) return 1.00; if (c <= 35) return 0.96;
     if (c <= 40) return 0.91; if (c <= 45) return 0.87; if (c <= 50) return 0.82;
     return 0.71;
   }
   function bundleFactor(ccc) {
-    if (ccc <= 3) return 1.00;
-    if (ccc <= 6) return 0.80;
-    if (ccc <= 9) return 0.70;
-    if (ccc <= 20) return 0.50;
-    if (ccc <= 30) return 0.45;
-    if (ccc <= 40) return 0.40;
+    if (ccc <= 3) return 1.00; if (ccc <= 6) return 0.80; if (ccc <= 9) return 0.70;
+    if (ccc <= 20) return 0.50; if (ccc <= 30) return 0.45; if (ccc <= 40) return 0.40;
     return 0.35;
   }
   function cap2404d(awg, rawA, isAl, isMotor) {
@@ -351,20 +416,20 @@
     if (awg === "10 AWG") return Math.min(rawA, 30);
     return rawA;
   }
-  function pickOcpd(targetA) {
-    for (var i = 0; i < STD_OCPD.length; i++) {
-      if (STD_OCPD[i] >= targetA - 0.001) return STD_OCPD[i];
+  function pickUp(targetA, tbl) {
+    var list = tbl || STD_OCPD;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] >= targetA - 0.001) return list[i];
     }
-    return STD_OCPD[STD_OCPD.length - 1];
+    return list[list.length - 1];
   }
-  function pickOcpdDown(maxA) {
-    var chosen = STD_OCPD[0];
-    for (var i = 0; i < STD_OCPD.length; i++) {
-      if (STD_OCPD[i] <= maxA + 0.001) {
-        chosen = STD_OCPD[i];
-      } else {
-        break;
-      }
+  function pickDown(maxA, tbl) {
+    var list = tbl || STD_OCPD;
+    if (maxA < list[0]) return 0;
+    var chosen = list[0];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] <= maxA + 0.001) chosen = list[i];
+      else break;
     }
     return chosen;
   }
@@ -387,6 +452,39 @@
     }
     if ((parallelSets || 1) === 1 && egcIdx > finalPhaseIdx) egcIdx = finalPhaseIdx;
     return egcIdx;
+  }
+  function pickGecIdx250102(phaseIdx, mat, parallelSets) {
+    var totCmil = WIRE_DB[phaseIdx].cmil * (parallelSets || 1);
+    for (var i = 0; i < NEC_250_102.length; i++) {
+      var lim = mat === "AL" ? NEC_250_102[i].maxAl : NEC_250_102[i].maxCu;
+      if (totCmil <= lim) {
+        var sz = mat === "AL" ? NEC_250_102[i].al : NEC_250_102[i].cu;
+        var idx = WIRE_DB.findIndex(function(x){ return x.awg === sz; });
+        return idx >= 0 ? idx : 0;
+      }
+    }
+    var reqC = totCmil * 0.125;
+    for (var w = 0; w < WIRE_DB.length; w++) {
+      if (WIRE_DB[w].cmil >= reqC - 0.1) return w;
+    }
+    return WIRE_DB.length - 1;
+  }
+  function sizeSetsForAmps(reqA, mat, ambC, isMotor) {
+    var kAmb = k90Factor(ambC);
+    var minPar = WIRE_DB.findIndex(function(x){ return x.awg === "1/0 AWG"; });
+    for (var sets = 1; sets <= 8; sets++) {
+      var startI = sets === 1 ? 0 : minPar;
+      var perSet = reqA / sets;
+      for (var w = startI; w < WIRE_DB.length; w++) {
+        var wr = WIRE_DB[w];
+        var a75 = mat === "AL" ? wr.al75 : wr.cu75;
+        var a90 = mat === "AL" ? wr.al90 : wr.cu90;
+        var e75 = cap2404d(wr.awg, a75, mat === "AL", isMotor);
+        var e90 = cap2404d(wr.awg, a90 * kAmb, mat === "AL", isMotor);
+        if (Math.min(e75, e90) >= perSet) return { sets: sets, idx: w };
+      }
+    }
+    return { sets: 8, idx: WIRE_DB.length - 1 };
   }
   function vdCalc(idx, mat, fla, sp, ft, pf) {
     var r = WIRE_DB[idx];
@@ -463,6 +561,131 @@
     }
   }
 
+  function renderTransformer(ambC) {
+    var ph = Number(document.getElementById("xfmr-ph").value || 3);
+    var rawVal = Number(document.getElementById("xfmr-val").value || 0);
+    var unit = document.getElementById("xfmr-unit").value;
+    var vPri = Number(document.getElementById("xfmr-vpri").value || 480);
+    var vSec = Number(document.getElementById("xfmr-vsec").value || 208);
+    var scheme = document.getElementById("xfmr-scheme").value;
+    var mat = document.getElementById("xfmr-mat").value;
+    var matLbl = mat === "AL" ? "Al" : "Cu";
+
+    var va = unit === "VA" ? rawVal : (rawVal * 1000.0);
+    var kva = va / 1000.0;
+    var denom = ph === 3 ? Math.sqrt(3.0) : 1.0;
+    var iPri = vPri > 0 ? (va / (denom * vPri)) : 0;
+    var iSec = vSec > 0 ? (va / (denom * vSec)) : 0;
+
+    var priMult = 1.25, priRaw = 0, priOcpd = 0, priRule = "";
+    var secMult = 0, secRaw = 0, secOcpd = 0, secRule = "";
+
+    if (scheme === "pri_only") {
+      if (iPri >= 9.0) {
+        priMult = 1.25; priRaw = iPri * 1.25;
+        priOcpd = pickUp(priRaw, STD_XFMR_OCPD);
+        priRule = "125% (Note 1 next std up)";
+      } else if (iPri >= 2.0) {
+        priMult = 1.67; priRaw = iPri * 1.67;
+        priOcpd = pickDown(priRaw, STD_XFMR_OCPD);
+        priRule = "167% max (round down)";
+      } else {
+        priMult = 3.00; priRaw = iPri * 3.00;
+        priOcpd = pickDown(priRaw, STD_XFMR_OCPD);
+        priRule = "300% max (round down; up to 500% under 430.72(C) control)";
+      }
+      secRule = "Not required by 450.3(B) (Primary-Only)";
+    } else {
+      priMult = 2.50; priRaw = iPri * 2.50;
+      priOcpd = pickDown(priRaw, STD_XFMR_OCPD);
+      priRule = "250% max (round down)";
+      if (iSec >= 9.0) {
+        secMult = 1.25; secRaw = iSec * 1.25;
+        secOcpd = pickUp(secRaw, STD_XFMR_OCPD);
+        secRule = "125% (Note 1 next std up)";
+      } else {
+        secMult = 1.67; secRaw = iSec * 1.67;
+        secOcpd = pickDown(secRaw, STD_XFMR_OCPD);
+        secRule = "167% max (round down)";
+      }
+    }
+
+    var priCc = priRaw < 15.0 ? pickDown(priRaw, CLASS_CC) : 0;
+    var secCc = (scheme === "pri_sec" && secRaw < 15.0) ? pickDown(secRaw, CLASS_CC) : 0;
+
+    var priSizing = sizeSetsForAmps(iPri * 1.25, mat, ambC, false);
+    var secSizing = sizeSetsForAmps(iSec * 1.25, mat, ambC, false);
+    var priEgcIdx = pickEgcIdx(Math.max(15, priOcpd), mat, priSizing.idx, priSizing.idx, priSizing.sets);
+    var secGecIdx = pickGecIdx250102(secSizing.idx, mat, secSizing.sets);
+
+    var priWires = ph === 3 ? 3 : 2;
+    var secWires = ph === 3 ? (vSec <= 240 ? 4 : 3) : (vSec >= 200 ? 3 : 2);
+    var priArea = (priWires * WIRE_DB[priSizing.idx].area) + WIRE_DB[priEgcIdx].area;
+    var secArea = (secWires * WIRE_DB[secSizing.idx].area) + WIRE_DB[secGecIdx].area;
+    var priEmt = condPickByArea("EMT", priArea);
+    var secEmt = condPickByArea("EMT", secArea);
+    var secRmc = condPickByArea("RIGID", secArea);
+    var secPvc = condPickByArea("PVC40", secArea);
+
+    var priDisp = priOcpd > 0 ? (priOcpd + " A") : ("<= " + priRaw.toFixed(2) + " A");
+    if (priCc > 0 && priCc !== priOcpd) priDisp = priDisp + " (or " + priCc + "A CC)";
+    var secDisp = scheme === "pri_only" ? "Optional (Pri-Only)" : (secOcpd > 0 ? (secOcpd + " A") : ("<= " + secRaw.toFixed(2) + " A"));
+    if (secCc > 0 && secCc !== secOcpd) secDisp = secDisp + " (or " + secCc + "A CC)";
+
+    var fText =
+      "NEC 450.3(B) [" + (unit === "VA" ? (rawVal + " VA") : (kva + " kVA")) + " " + ph + "P " + vPri + "V -> " + vSec + "V]: " +
+      "I_pri = " + iPri.toFixed(2) + "A x " + Math.round(priMult * 100) + "% = " + priRaw.toFixed(2) + "A (" + priRule + ")";
+    if (scheme === "pri_sec") {
+      fText = fText + "  |  I_sec = " + iSec.toFixed(2) + "A x " + Math.round(secMult * 100) + "% = " + secRaw.toFixed(2) + "A (" + secRule + ")";
+    }
+    document.getElementById("xfmr-formula").textContent = fText;
+
+    var priPfx = priSizing.sets > 1 ? (priSizing.sets + "x ") : "";
+    var secPfx = secSizing.sets > 1 ? (secSizing.sets + "x ") : "";
+    var priWireNote = (scheme === "pri_sec" && ph === 3)
+      ? "Note: On 3P Delta-Wye, size pri wire for pri OCPD (" + priOcpd + "A) per 240.21(C)(1)"
+      : ("EMT (40%): " + priEmt.text);
+
+    buildStatCards(document.getElementById("xfmr-summary"), [
+      {
+        lbl: "Primary FLA (" + vPri + " V, " + ph + "P)",
+        val: iPri.toFixed(2) + " A",
+        sub: "125% Cont: " + (iPri * 1.25).toFixed(2) + " A | Ratio: " + (vSec > 0 ? (vPri / vSec).toFixed(2) : "0") + ":1",
+        cls: "pill-w"
+      },
+      {
+        lbl: "Max Primary OCPD (NEC 450.3(B))",
+        val: priDisp,
+        sub: "Ceiling: " + priRaw.toFixed(2) + " A (" + Math.round(priMult * 100) + "%)",
+        cls: "pill-m"
+      },
+      {
+        lbl: "Secondary FLA (" + vSec + " V, " + ph + "P)",
+        val: iSec.toFixed(2) + " A",
+        sub: "125% Cont: " + (iSec * 1.25).toFixed(2) + " A | " + secWires + " wires/set",
+        cls: "pill-w"
+      },
+      {
+        lbl: "Max Secondary OCPD (NEC 450.3(B))",
+        val: secDisp,
+        sub: scheme === "pri_only" ? secRule : ("Ceiling: " + secRaw.toFixed(2) + " A (" + Math.round(secMult * 100) + "%)"),
+        cls: scheme === "pri_only" ? "pill-t" : "pill-o"
+      },
+      {
+        lbl: "Primary 125% Wire + EGC (250.122)",
+        val: priPfx + WIRE_DB[priSizing.idx].awg + " " + matLbl + " + " + WIRE_DB[priEgcIdx].awg + " EGC",
+        sub: priWireNote,
+        cls: "pill-w"
+      },
+      {
+        lbl: "Secondary 125% Wire + GEC/SBJ (250.102(C)(1))",
+        val: secPfx + WIRE_DB[secSizing.idx].awg + " " + matLbl + " + " + WIRE_DB[secGecIdx].awg + " GEC",
+        sub: "EMT: " + secEmt.text + " | RMC: " + secRmc.text + " | PVC: " + secPvc.text,
+        cls: secEmt.over ? "pill-hi" : "pill-c"
+      }
+    ]);
+  }
+
   function renderFeederSummary(ambC, maxVd, autoVd) {
     var fTopo = document.getElementById("feeder-topo").value;
     var fScope = document.getElementById("feeder-scope").value;
@@ -474,9 +697,7 @@
     var matched = [];
     for (var i = 0; i < ROWS.length; i++) {
       var r = ROWS[i];
-      if (r.topology === fTopo) {
-        if (fScope === "all" || r.in_raceway) matched.push(r);
-      }
+      if (r.topology === fTopo && (fScope === "all" || r.in_raceway)) matched.push(r);
     }
 
     var formulaEl = document.getElementById("feeder-formula");
@@ -488,26 +709,18 @@
       return;
     }
 
-    var motors = [];
-    var nonMotors = [];
-    var totalRunningFla = 0;
-    var weightedPfNum = 0;
-    var refs = [];
+    var motors = [], nonMotors = [], totalRunningFla = 0, weightedPfNum = 0, refs = [];
     for (var j = 0; j < matched.length; j++) {
       var item = matched[j];
       refs.push(item.ref);
       totalRunningFla += item.fla;
       weightedPfNum += item.fla * (item._pf || 1.0);
-      if (item._isMotor) {
-        motors.push(item);
-      } else {
-        nonMotors.push(item);
-      }
+      if (item._isMotor) motors.push(item);
+      else nonMotors.push(item);
     }
     var avgPf = sp.dc ? 1.0 : (totalRunningFla > 0 ? (weightedPfNum / totalRunningFla) : 1.0);
 
-    var nonMotorContFla = 0;
-    var nonMotorNonContFla = 0;
+    var nonMotorContFla = 0, nonMotorNonContFla = 0;
     for (var n = 0; n < nonMotors.length; n++) {
       if (nonMotors[n].continuous) nonMotorContFla += nonMotors[n].fla;
       else nonMotorNonContFla += nonMotors[n].fla;
@@ -515,16 +728,10 @@
     var nonMotorDesign = (1.25 * nonMotorContFla) + nonMotorNonContFla;
 
     var hasMotors = motors.length > 0;
-    var minFeederAmps = 0;
-    var maxOcpdRaw = 0;
-    var feederOcpd = 15;
-    var basis = "";
-    var formulaText = "";
+    var minFeederAmps = 0, maxOcpdRaw = 0, feederOcpd = 15, basis = "", formulaText = "";
 
     if (hasMotors) {
-      var maxFlaIdx = 0;
-      var maxOcpdIdx = 0;
-      var sumMotorFla = 0;
+      var maxFlaIdx = 0, maxOcpdIdx = 0, sumMotorFla = 0;
       for (var m = 0; m < motors.length; m++) {
         sumMotorFla += motors[m].fla;
         if (motors[m].fla > motors[maxFlaIdx].fla) maxFlaIdx = m;
@@ -540,7 +747,7 @@
       var topOcpdM = motors[maxOcpdIdx];
       var otherMotors43062 = sumMotorFla - topOcpdM.fla;
       maxOcpdRaw = topOcpdM.ocpd_amps + otherMotors43062 + nonMotorDesign;
-      feederOcpd = pickOcpdDown(maxOcpdRaw);
+      feederOcpd = pickDown(maxOcpdRaw, STD_OCPD);
       basis = "NEC 430.24 / 430.62(A)" + (nonMotors.length > 0 ? " + 430.63" : "");
 
       formulaText =
@@ -551,7 +758,7 @@
     } else {
       minFeederAmps = nonMotorDesign;
       maxOcpdRaw = nonMotorDesign;
-      feederOcpd = pickOcpd(nonMotorDesign);
+      feederOcpd = pickUp(nonMotorDesign, STD_OCPD);
       basis = "NEC 215.2 / 215.3 (Non-Motor Feeder)";
       formulaText =
         "215.2 Conductor = 125% x " + nonMotorContFla.toFixed(1) + "A cont + 100% x " +
@@ -560,20 +767,14 @@
     }
     formulaEl.textContent = formulaText;
 
-    // Select feeder conductor (supports 1 to 6 parallel sets, min 1/0 AWG per NEC 310.10(G))
     var minParallelIdx = WIRE_DB.findIndex(function(x){ return x.awg === "1/0 AWG"; });
-    var chosenSets = 1;
-    var baseIdx = WIRE_DB.length - 1;
-    var finalIdx = WIRE_DB.length - 1;
-    var w60 = WIRE_DB[WIRE_DB.length - 1].awg;
-    var w75 = w60;
-    var w90 = w60;
+    var chosenSets = 1, baseIdx = WIRE_DB.length - 1, finalIdx = WIRE_DB.length - 1;
+    var w60 = WIRE_DB[WIRE_DB.length - 1].awg, w75 = w60, w90 = w60;
 
     for (var sets = 1; sets <= 6; sets++) {
       var startI = sets === 1 ? 0 : minParallelIdx;
       var reqPerSet = minFeederAmps / sets;
-      var foundBase = -1;
-      var t60 = "", t75 = "", t90 = "";
+      var foundBase = -1, t60 = "", t75 = "", t90 = "";
 
       for (var w = startI; w < WIRE_DB.length; w++) {
         var wr = WIRE_DB[w];
@@ -592,17 +793,11 @@
 
       var fIdx = foundBase;
       if (autoVd && fLen > 0) {
-        while (fIdx < WIRE_DB.length - 1 && vdCalc(fIdx, fMat, totalRunningFla / sets, sp, fLen, avgPf).p > maxVd) {
-          fIdx++;
-        }
+        while (fIdx < WIRE_DB.length - 1 && vdCalc(fIdx, fMat, totalRunningFla / sets, sp, fLen, avgPf).p > maxVd) fIdx++;
       }
       var testVd = vdCalc(fIdx, fMat, totalRunningFla / sets, sp, fLen, avgPf);
-      chosenSets = sets;
-      baseIdx = foundBase;
-      finalIdx = fIdx;
-      w60 = t60 || "Parallel";
-      w75 = t75 || WIRE_DB[foundBase].awg;
-      w90 = t90 || WIRE_DB[foundBase].awg;
+      chosenSets = sets; baseIdx = foundBase; finalIdx = fIdx;
+      w60 = t60 || "Parallel"; w75 = t75 || WIRE_DB[foundBase].awg; w90 = t90 || WIRE_DB[foundBase].awg;
       if ((autoVd === false) || testVd.p <= maxVd || sets === 6) break;
     }
 
@@ -615,45 +810,17 @@
     var rmcF = condPickByArea("RIGID", areaPerSet);
     var pvcF = condPickByArea("PVC40", areaPerSet);
 
-    var ocpdWarn = feederOcpd < minFeederAmps ? "Note: Rounded-down 430.62 OCPD is below 430.24 ampacity" : ("Circuits: " + refs.join(", ") + " (" + motors.length + " motor, " + nonMotors.length + " other)");
+    var ocpdWarn = feederOcpd < minFeederAmps
+      ? "Note: Rounded-down 430.62 OCPD is below 430.24 ampacity"
+      : ("Circuits: " + refs.join(", ") + " (" + motors.length + " motor, " + nonMotors.length + " other)");
 
     buildStatCards(boxEl, [
-      {
-        lbl: "Min Feeder Ampacity (" + (hasMotors ? "NEC 430.24" : "NEC 215.2") + ")",
-        val: minFeederAmps.toFixed(2) + " A",
-        sub: "Running FLA: " + totalRunningFla.toFixed(2) + " A (avg PF " + avgPf.toFixed(2) + ")",
-        cls: "pill-w"
-      },
-      {
-        lbl: (hasMotors ? "Max Feeder OCPD (" + basis + ")" : "Min Feeder OCPD (NEC 215.3)"),
-        val: feederOcpd + " A",
-        sub: hasMotors ? ("Calc ceiling: " + maxOcpdRaw.toFixed(2) + " A | " + ocpdWarn) : ocpdWarn,
-        cls: hasMotors ? "pill-m" : "pill-o"
-      },
-      {
-        lbl: "Feeder Size by Temp (" + (chosenSets > 1 ? (chosenSets + " Parallel Sets") : "Single Set") + ")",
-        val: "60C:" + w60.replace(" AWG","") + " | 75C:" + w75.replace(" AWG","") + " | 90C:" + w90.replace(" AWG",""),
-        sub: "Material: " + matLbl + " @ " + ambC + "C ambient",
-        cls: "pill-t"
-      },
-      {
-        lbl: "Selected Feeder Wire + EGC (" + (chosenSets > 1 ? "250.122(F) Each" : "250.122") + ")",
-        val: setPrefix + WIRE_DB[finalIdx].awg + " " + matLbl + " + " + WIRE_DB[egcIdx].awg + " EGC",
-        sub: finalIdx > baseIdx ? ("Upsized from " + WIRE_DB[baseIdx].awg + " for VD") : "Ampacity-governed",
-        cls: "pill-w"
-      },
-      {
-        lbl: "Feeder Voltage Drop (" + fLen + " ft)",
-        val: fVd.v.toFixed(1) + " V (" + fVd.p.toFixed(2) + "%)",
-        sub: "Calculated on " + totalRunningFla.toFixed(1) + " A running load",
-        cls: fVd.p > maxVd ? "pill-hi" : "pill-o"
-      },
-      {
-        lbl: "Feeder Conduit Fill (" + (chosenSets > 1 ? "Per Parallel Raceway" : "40% Max") + ")",
-        val: emtF.text,
-        sub: "RMC: " + rmcF.text + " | PVC: " + pvcF.text,
-        cls: emtF.over ? "pill-hi" : "pill-c"
-      }
+      { lbl: "Min Feeder Ampacity (" + (hasMotors ? "NEC 430.24" : "NEC 215.2") + ")", val: minFeederAmps.toFixed(2) + " A", sub: "Running FLA: " + totalRunningFla.toFixed(2) + " A (avg PF " + avgPf.toFixed(2) + ")", cls: "pill-w" },
+      { lbl: (hasMotors ? "Max Feeder OCPD (" + basis + ")" : "Min Feeder OCPD (NEC 215.3)"), val: feederOcpd + " A", sub: hasMotors ? ("Calc ceiling: " + maxOcpdRaw.toFixed(2) + " A | " + ocpdWarn) : ocpdWarn, cls: hasMotors ? "pill-m" : "pill-o" },
+      { lbl: "Feeder Size by Temp (" + (chosenSets > 1 ? (chosenSets + " Parallel Sets") : "Single Set") + ")", val: "60C:" + w60.replace(" AWG","") + " | 75C:" + w75.replace(" AWG","") + " | 90C:" + w90.replace(" AWG",""), sub: "Material: " + matLbl + " @ " + ambC + "C ambient", cls: "pill-t" },
+      { lbl: "Selected Feeder Wire + EGC (" + (chosenSets > 1 ? "250.122(F) Each" : "250.122") + ")", val: setPrefix + WIRE_DB[finalIdx].awg + " " + matLbl + " + " + WIRE_DB[egcIdx].awg + " EGC", sub: finalIdx > baseIdx ? ("Upsized from " + WIRE_DB[baseIdx].awg + " for VD") : "Ampacity-governed", cls: "pill-w" },
+      { lbl: "Feeder Voltage Drop (" + fLen + " ft)", val: fVd.v.toFixed(1) + " V (" + fVd.p.toFixed(2) + "%)", sub: "Calculated on " + totalRunningFla.toFixed(1) + " A running load", cls: fVd.p > maxVd ? "pill-hi" : "pill-o" },
+      { lbl: "Feeder Conduit Fill (" + (chosenSets > 1 ? "Per Parallel Raceway" : "40% Max") + ")", val: emtF.text, sub: "RMC: " + rmcF.text + " | PVC: " + pvcF.text, cls: emtF.over ? "pill-hi" : "pill-c" }
     ]);
   }
 
@@ -669,20 +836,13 @@
       return;
     }
 
-    var phaseArea = 0.0;
-    var maxOcpd = 0;
-    var maxOcpdRow = checkedRows[0];
-    var allAl = true;
-    var refs = [];
+    var phaseArea = 0.0, maxOcpd = 0, maxOcpdRow = checkedRows[0], allAl = true, refs = [];
     for (var i = 0; i < checkedRows.length; i++) {
       var r = checkedRows[i];
       refs.push(r.ref);
       phaseArea += r._pwires * WIRE_DB[r._wireIdx].area;
       if (r.material === "CU") allAl = false;
-      if (r.ocpd_amps > maxOcpd) {
-        maxOcpd = r.ocpd_amps;
-        maxOcpdRow = r;
-      }
+      if (r.ocpd_amps > maxOcpd) { maxOcpd = r.ocpd_amps; maxOcpdRow = r; }
     }
     var egcMat = allAl ? "AL" : "CU";
     var sharedEgcIdx = pickEgcIdx(maxOcpd, egcMat, maxOcpdRow._baseIdx, maxOcpdRow._wireIdx, 1);
@@ -713,10 +873,7 @@
 
     var totalCcc = 0;
     for (var k = 0; k < ROWS.length; k++) {
-      if (ROWS[k].in_raceway) {
-        var sp0 = TOPO[ROWS[k].topology] || TOPO["3P/480VAC"];
-        totalCcc += sp0.w;
-      }
+      if (ROWS[k].in_raceway) totalCcc += (TOPO[ROWS[k].topology] || TOPO["3P/480VAC"]).w;
     }
     var sharedBFac = bundleFactor(totalCcc);
 
@@ -734,21 +891,16 @@
       var hpTbl = MOTOR_FLA[s.topology] || {};
       var hpStr = s.motor_hp ? String(s.motor_hp) : "";
       var isMotor = Object.prototype.hasOwnProperty.call(hpTbl, hpStr);
-      if (isMotor === false) {
-        hpStr = "";
-        s.motor_hp = "";
-      }
+      if (isMotor === false) { hpStr = ""; s.motor_hp = ""; }
 
       var kw = Number(s.kw || 0);
       var ft = Number(s.length_ft || 0);
-      var fla = 0;
-      var pf = 1.0;
+      var fla = 0, pf = 1.0;
 
       if (isMotor) {
         fla = hpTbl[hpStr];
         kw = Number((Number(hpStr) * 0.746).toFixed(2));
-        s.kw = kw;
-        s.continuous = true;
+        s.kw = kw; s.continuous = true;
         pf = sp.dc ? 1.0 : 0.85;
       } else {
         pf = 1.0;
@@ -757,16 +909,16 @@
 
       var des = fla * (s.continuous ? 1.25 : 1.0);
       var ocpd = isMotor
-        ? pickOcpd(fla * (sp.dc ? 1.50 : (motorOcpdMode === "fuse" ? 1.75 : 2.50)))
-        : pickOcpd(des);
+        ? pickUp(fla * (sp.dc ? 1.50 : (motorOcpdMode === "fuse" ? 1.75 : 2.50)), STD_OCPD)
+        : pickUp(des, STD_OCPD);
 
       totKw += kw; totDes += des;
 
       var rowBFac = (applyBundle && s.in_raceway) ? sharedBFac : 1.0;
       var k90 = kAmb * rowBFac;
-
       var maxAwg = WIRE_DB[WIRE_DB.length - 1].awg;
       var w60 = maxAwg, w75 = maxAwg, w90 = maxAwg, baseAwg = maxAwg;
+
       for (var j = 0; j < WIRE_DB.length; j++) {
         var row = WIRE_DB[j];
         var a60 = mat === "AL" ? row.al60 : row.cu60;
@@ -915,6 +1067,7 @@
       "Rows: " + ROWS.length + " | Total kW: " + totKw.toFixed(1) + " | Sum Design: " + totDes.toFixed(1) + "A";
 
     renderFeederSummary(amb, maxVd, autoVd);
+    renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
     saveState();
   }
@@ -925,15 +1078,21 @@
     for (var i = 0; i < ROWS.length; i++) ROWS[i].material = v;
     recalc();
   };
-  document.getElementById("motor-ocpd-mode").onchange = recalc;
-  document.getElementById("amb-c").onchange = recalc;
-  document.getElementById("max-vd").onchange = recalc;
-  document.getElementById("auto-vd").onchange = recalc;
-  document.getElementById("apply-bundle-derate").onchange = recalc;
-  document.getElementById("feeder-topo").onchange = recalc;
-  document.getElementById("feeder-scope").onchange = recalc;
-  document.getElementById("feeder-mat").onchange = recalc;
-  document.getElementById("feeder-ft").onchange = recalc;
+  document.getElementById("xfmr-preset").onchange = function() {
+    var v = this.value;
+    if (v === "") return;
+    var parts = v.split(",");
+    document.getElementById("xfmr-ph").value = parts[0];
+    document.getElementById("xfmr-val").value = parts[1];
+    document.getElementById("xfmr-unit").value = parts[2];
+    document.getElementById("xfmr-vpri").value = parts[3];
+    document.getElementById("xfmr-vsec").value = parts[4];
+    document.getElementById("xfmr-scheme").value = parts[5];
+    recalc();
+  };
+  ["motor-ocpd-mode","amb-c","max-vd","auto-vd","apply-bundle-derate","feeder-topo","feeder-scope","feeder-mat","feeder-ft","xfmr-ph","xfmr-val","xfmr-unit","xfmr-vpri","xfmr-vsec","xfmr-scheme","xfmr-mat"].forEach(function(id){
+    document.getElementById(id).onchange = recalc;
+  });
 
   document.getElementById("btn-print").onclick = function() { window.print(); };
   document.getElementById("btn-sel-all").onclick = function() {
@@ -946,7 +1105,10 @@
   };
   document.getElementById("btn-reset").onclick = function() {
     ROWS = cloneDefaults();
-    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(PREV_STORAGE_KEY); } catch (e) {}
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      for (var pk = 0; pk < PREV_KEYS.length; pk++) localStorage.removeItem(PREV_KEYS[pk]);
+    } catch (e) {}
     recalc();
   };
   document.getElementById("btn-add").onclick = function() {
