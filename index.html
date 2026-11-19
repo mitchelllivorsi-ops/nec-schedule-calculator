@@ -226,7 +226,8 @@
     </div>
   </div>
   <div class="bar" style="margin-top:10px;margin-bottom:0;">
-    <span style="color:#fcd34d;font-weight:600;">Downstream Point-to-Point SCA:</span>
+    <span style="color:#fcd34d;font-weight:600;">Source &amp; Point-to-Point SCA:</span>
+    <label title="Upstream primary available fault current in kA (0 = Infinite Bus)">Pri Bus (kA): <input id="xfmr-pri-sca" class="in" style="width:62px;" type="number" step="1" min="0" value="0" placeholder="Inf"></label>
     <label title="One-way secondary feeder run length in feet (0 = at transformer lugs)">Sec Run (ft): <input id="xfmr-sec-ft" class="in" style="width:62px;" type="number" step="10" min="0" value="50"></label>
     <label>Sec Wire:
       <select id="xfmr-sec-wire" class="sel">
@@ -726,9 +727,14 @@
     var secDisp = scheme === "pri_only" ? "Optional (Pri-Only)" : (secOcpd > 0 ? (secOcpd + " A") : ("<= " + secRaw.toFixed(2) + " A"));
     if (secCc > 0 && secCc !== secOcpd) secDisp = secDisp + " (or " + secCc + "A CC)";
 
-    // Infinite-bus bolted fault at transformer secondary lugs
+    // Finite vs Infinite Primary Bus bolted fault at transformer secondary lugs
     var zPct = Math.max(0.1, Number(document.getElementById("xfmr-zpct").value || 4.5));
-    var scaAmps = iSec > 0 ? (iSec / (zPct / 100.0)) : 0;
+    var zTxPu = zPct / 100.0;
+    var priScaKa = Math.max(0, Number(document.getElementById("xfmr-pri-sca").value || 0));
+    var zSysPu = (priScaKa > 0 && iPri > 0) ? (iPri / (priScaKa * 1000.0)) : 0.0;
+    var zTotPu = zTxPu + zSysPu;
+    var scaInfAmps = (iSec > 0 && zTxPu > 0) ? (iSec / zTxPu) : 0;
+    var scaAmps = (iSec > 0 && zTotPu > 0) ? (iSec / zTotPu) : 0;
     var scaKa = scaAmps / 1000.0;
     var aicTiers = [10, 14, 18, 22, 25, 35, 42, 50, 65, 100, 150, 200];
     function pickAicTier(kaVal) {
@@ -739,7 +745,14 @@
     }
     var minAic = pickAicTier(scaKa);
     var scaPill = scaKa > 22.0 ? "pill-hi" : (scaKa > 10.0 ? "pill-m" : "pill-o");
-    var scaSub = "Min AIC/SCCR >= " + minAic + " kA (NEC 110.9) | " + (ph === 1 && vSec === 240 ? "1P 240V L-N ~1.3-1.5x L-L" : "Upper bound at sec lugs");
+    var lugsLbl = priScaKa > 0
+      ? ("Transformer Lugs SCA (Finite: " + priScaKa + " kA Pri | Z_tot=" + (zTotPu * 100).toFixed(2) + "%)")
+      : ("Transformer Lugs SCA (Inf. Bus @ " + zPct.toFixed(1) + "%Z)");
+    var scaSub = "Min AIC/SCCR >= " + minAic + " kA (NEC 110.9) | " + (
+      priScaKa > 0
+        ? ("Z_sys=" + (zSysPu * 100).toFixed(2) + "% (vs " + Math.round(scaInfAmps).toLocaleString() + " A inf.)")
+        : (ph === 1 && vSec === 240 ? "1P 240V L-N ~1.3-1.5x L-L" : "Upper bound at sec lugs")
+    );
 
     // Downstream Point-to-Point fault drop along secondary feeder run
     var runFt = Math.max(0, Number(document.getElementById("xfmr-sec-ft").value || 0));
@@ -778,7 +791,8 @@
     if (scheme === "pri_sec") {
       fText = fText + "  |  I_sec = " + iSec.toFixed(2) + "A x " + Math.round(secMult * 100) + "% = " + secRaw.toFixed(2) + "A (" + secRule + ")";
     }
-    fText = fText + "  |  Lugs SCA = " + Math.round(scaAmps).toLocaleString() + " A (" + scaKa.toFixed(2) + " kA) -> Panel @ " + runFt + " ft = " + Math.round(panelScaAmps).toLocaleString() + " A (" + panelScaKa.toFixed(2) + " kA, -" + dropPct.toFixed(1) + "%)";
+    var busTag = priScaKa > 0 ? (priScaKa + "kA Pri") : "Inf Bus";
+    fText = fText + "  |  Lugs SCA (" + busTag + ") = " + Math.round(scaAmps).toLocaleString() + " A (" + scaKa.toFixed(2) + " kA) -> Panel @ " + runFt + " ft = " + Math.round(panelScaAmps).toLocaleString() + " A (" + panelScaKa.toFixed(2) + " kA, -" + dropPct.toFixed(1) + "%)";
     document.getElementById("xfmr-formula").textContent = fText;
 
     var pfxA = priMin.sets > 1 ? (priMin.sets + "x ") : "";
@@ -840,7 +854,7 @@
         cls: secEmt.over ? "pill-hi" : "pill-c"
       },
       {
-        lbl: "Transformer Lugs SCA (Inf. Bus @ " + zPct.toFixed(1) + "%Z)",
+        lbl: lugsLbl,
         val: Math.round(scaAmps).toLocaleString() + " A (" + scaKa.toFixed(2) + " kA sym)",
         sub: scaSub,
         cls: scaPill
@@ -1260,7 +1274,7 @@
     if (parts[6]) document.getElementById("xfmr-zpct").value = parts[6];
     recalc();
   };
-  ["motor-ocpd-mode","amb-c","max-vd","auto-vd","apply-bundle-derate","feeder-topo","feeder-scope","feeder-mat","feeder-ft","xfmr-ph","xfmr-val","xfmr-unit","xfmr-vpri","xfmr-vsec","xfmr-scheme","xfmr-mat","xfmr-zpct","xfmr-sec-ft","xfmr-sec-wire","xfmr-sec-sets","xfmr-sec-raceway"].forEach(function(id){
+  ["motor-ocpd-mode","amb-c","max-vd","auto-vd","apply-bundle-derate","feeder-topo","feeder-scope","feeder-mat","feeder-ft","xfmr-ph","xfmr-val","xfmr-unit","xfmr-vpri","xfmr-vsec","xfmr-scheme","xfmr-mat","xfmr-zpct","xfmr-sec-ft","xfmr-sec-wire","xfmr-sec-sets","xfmr-sec-raceway","xfmr-pri-sca"].forEach(function(id){
     document.getElementById(id).onchange = recalc;
   });
 
@@ -1351,7 +1365,8 @@
         sec_run_ft: Number(document.getElementById("xfmr-sec-ft").value || 0),
         sec_wire: document.getElementById("xfmr-sec-wire").value,
         sec_sets: Number(document.getElementById("xfmr-sec-sets").value || 0),
-        sec_raceway: document.getElementById("xfmr-sec-raceway").value
+        sec_raceway: document.getElementById("xfmr-sec-raceway").value,
+        pri_sca_ka: Math.max(0, Number(document.getElementById("xfmr-pri-sca").value || 0))
       },
       rows: cleanRows
     };
@@ -1451,7 +1466,8 @@
         sec_run_ft: Number(document.getElementById("xfmr-sec-ft").value || 0),
         sec_wire: document.getElementById("xfmr-sec-wire").value,
         sec_sets: Number(document.getElementById("xfmr-sec-sets").value || 0),
-        sec_raceway: document.getElementById("xfmr-sec-raceway").value
+        sec_raceway: document.getElementById("xfmr-sec-raceway").value,
+        pri_sca_ka: Math.max(0, Number(document.getElementById("xfmr-pri-sca").value || 0))
       },
       rows: cleanRows
     };
@@ -1501,6 +1517,7 @@
       if (x.sec_wire !== undefined) document.getElementById("xfmr-sec-wire").value = String(x.sec_wire);
       if (x.sec_sets !== undefined) document.getElementById("xfmr-sec-sets").value = String(x.sec_sets);
       if (x.sec_raceway === "steel" || x.sec_raceway === "pvc") document.getElementById("xfmr-sec-raceway").value = x.sec_raceway;
+      if (x.pri_sca_ka !== undefined) document.getElementById("xfmr-pri-sca").value = String(x.pri_sca_ka);
     }
   }
 
