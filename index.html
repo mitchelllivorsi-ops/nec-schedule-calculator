@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="./manifest.json">
-<title>NEC Multi-Topology Schedule (Cu/Al, 60/75/90C, EMT/RMC/PVC, AB & SqD OL)</title>
+<title>NEC Multi-Topology Schedule (Cu/Al, 60/75/90C, EMT/RMC/PVC, AB &amp; SqD OL)</title>
 <style>
   :root { --bg:#0f172a; --panel:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; }
   * { box-sizing:border-box; }
@@ -35,8 +35,8 @@
 <body>
 <header>
   <div>
-    <h1>NEC Article 220/424/430 Conductor, Temp Breakdown, Conduit Fill & Overload Schedule</h1>
-    <div class="sub">Standalone Calculator — 3P/480V, 3P/240V, 1P/240V, 1P/120V & 250VDC | Copper & Aluminum | 60°C/75°C/90°C | EMT/Rigid/PVC Fill | AB & Square D</div>
+    <h1>NEC Article 220/424/430 Conductor, Temp Breakdown, Conduit Fill &amp; Overload Schedule</h1>
+    <div class="sub">Standalone Calculator — 3P/480V, 3P/240V, 1P/240V, 1P/120V &amp; 250VDC | Copper &amp; Aluminum | 60°C/75°C/90°C | EMT/Rigid/PVC Fill | AB &amp; Square D</div>
   </div>
   <div class="btn-row">
     <button onclick="downloadCSV()">⬇ Download CSV</button>
@@ -55,7 +55,7 @@
     </label>
     <label>Ambient (°C): <input id="amb-c" class="in" type="number" value="40" onchange="recalc()"></label>
     <label>Max VD (%): <input id="max-vd" class="in" type="number" step="0.5" value="3.0" onchange="recalc()"></label>
-    <label style="cursor:pointer;"><input id="auto-vd" type="checkbox" checked onchange="recalc()"> Auto-Upsize Wire & EGC for VD</label>
+    <label style="cursor:pointer;"><input id="auto-vd" type="checkbox" checked onchange="recalc()"> Auto-Upsize Wire &amp; EGC for VD</label>
     <span id="summary-txt" class="mono" style="color:#38bdf8;margin-left:auto;"></span>
   </div>
   <div id="err-box" style="display:none;color:#fca5a5;background:rgba(239,68,68,0.2);padding:8px;border-radius:6px;margin-bottom:10px;font-family:monospace;font-size:12px;"></div>
@@ -89,17 +89,23 @@
 <script id="init-data" type="application/json">[{"ref": "L1", "name": "3P/480V Load", "topology": "3P/480VAC", "material": "CU", "kw": 12.0, "length_ft": 125.0, "continuous": true, "fla": 14.43, "design_amps": 18.04, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "12 AWG", "egc_awg": "12 AWG", "upsized_for_vd": false, "vd_volts": 6.25, "vd_pct": 1.3, "emt_trade": "1/2\" EMT", "emt_fill_pct": 17.5, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 16.9, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 18.7, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L2", "name": "3P/240V Load", "topology": "3P/240VAC", "material": "CU", "kw": 10.0, "length_ft": 120.0, "continuous": true, "fla": 24.06, "design_amps": 30.07, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.63, "emt_trade": "3/4\" EMT", "emt_fill_pct": 24.6, "rmc_trade": "3/4\" RMC", "rmc_fill_pct": 23.8, "pvc_trade": "3/4\" PVC40", "pvc_fill_pct": 25.8, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L3", "name": "1P/240V Load", "topology": "1P/240VAC", "material": "CU", "kw": 6.0, "length_ft": 100.0, "continuous": true, "fla": 25.0, "design_amps": 31.25, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.62, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L4", "name": "1P/120V Load", "topology": "1P/120VAC", "material": "CU", "kw": 1.8, "length_ft": 80.0, "continuous": true, "fla": 15.0, "design_amps": 18.75, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "10 AWG", "egc_awg": "10 AWG", "upsized_for_vd": true, "vd_volts": 2.88, "vd_pct": 2.4, "emt_trade": "1/2\" EMT", "emt_fill_pct": 20.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 20.2, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 22.2, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L5", "name": "250VDC Load", "topology": "250VDC", "material": "CU", "kw": 8.0, "length_ft": 110.0, "continuous": true, "fla": 32.0, "design_amps": 40.0, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 5.49, "vd_pct": 2.2, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}]</script>
 
 <script>
-var ROWS = [];
+var FALLBACK_ROWS = [
+  { ref:"L1", name:"3P/480V Load", topology:"3P/480VAC", material:"CU", kw:12.0, length_ft:125.0, continuous:true },
+  { ref:"L2", name:"3P/240V Load", topology:"3P/240VAC", material:"CU", kw:10.0, length_ft:120.0, continuous:true },
+  { ref:"L3", name:"1P/240V Load", topology:"1P/240VAC", material:"CU", kw:6.0,  length_ft:100.0, continuous:true },
+  { ref:"L4", name:"1P/120V Load", topology:"1P/120VAC", material:"CU", kw:1.8,  length_ft:80.0,  continuous:true },
+  { ref:"L5", name:"250VDC Load",  topology:"250VDC",    material:"CU", kw:8.0,  length_ft:110.0, continuous:true }
+];
+
+var ROWS = FALLBACK_ROWS.slice();
 try {
-  ROWS = JSON.parse(document.getElementById("init-data").textContent);
+  var rawEl = document.getElementById("init-data");
+  if (rawEl && rawEl.textContent) {
+    var parsed = JSON.parse(rawEl.textContent);
+    if (Array.isArray(parsed) && parsed.length > 0) ROWS = parsed;
+  }
 } catch (e) {
-  ROWS = [
-    { ref:"L1", name:"3P/480V Load", topology:"3P/480VAC", material:"CU", kw:12.0, length_ft:125.0, continuous:true },
-    { ref:"L2", name:"3P/240V Load", topology:"3P/240VAC", material:"CU", kw:10.0, length_ft:120.0, continuous:true },
-    { ref:"L3", name:"1P/240V Load", topology:"1P/240VAC", material:"CU", kw:6.0,  length_ft:100.0, continuous:true },
-    { ref:"L4", name:"1P/120V Load", topology:"1P/120VAC", material:"CU", kw:1.8,  length_ft:80.0,  continuous:true },
-    { ref:"L5", name:"250VDC Load",  topology:"250VDC",    material:"CU", kw:8.0,  length_ft:110.0, continuous:true }
-  ];
+  ROWS = FALLBACK_ROWS.slice();
 }
 
 var TOPO = {
@@ -218,88 +224,82 @@ function addRow() {
   recalc();
 }
 function recalc() {
-  try {
-    var amb = Number(document.getElementById("amb-c").value || 40);
-    var maxVd = Number(document.getElementById("max-vd").value || 3.0);
-    var autoVd = document.getElementById("auto-vd").checked;
-    var k90 = k90Factor(amb);
-    var tb = document.getElementById("tbody");
-    tb.innerHTML = "";
-    var totKw = 0, totDes = 0;
-    var topKeys = ["3P/480VAC", "3P/240VAC", "1P/240VAC", "1P/120VAC", "250VDC"];
+  var amb = Number(document.getElementById("amb-c").value || 40);
+  var maxVd = Number(document.getElementById("max-vd").value || 3.0);
+  var autoVd = document.getElementById("auto-vd").checked;
+  var k90 = k90Factor(amb);
+  var tb = document.getElementById("tbody");
+  tb.innerHTML = "";
+  var totKw = 0, totDes = 0;
+  var topKeys = ["3P/480VAC", "3P/240VAC", "1P/240VAC", "1P/120VAC", "250VDC"];
 
-    for (var i = 0; i < ROWS.length; i++) {
-      var s = ROWS[i];
-      var sp = TOPO[s.topology] || TOPO["3P/480VAC"];
-      var mat = s.material === "AL" ? "AL" : "CU";
-      var kw = Number(s.kw || 0);
-      var ft = Number(s.length_ft || 0);
-      var fla = sp.dc ? (kw * 1000 / sp.v) : (sp.ph === 3 ? (kw * 1000 / (Math.sqrt(3) * sp.v)) : (kw * 1000 / sp.v));
-      var des = fla * (s.continuous ? 1.25 : 1.0);
-      totKw += kw; totDes += des;
+  for (var i = 0; i < ROWS.length; i++) {
+    var s = ROWS[i];
+    var sp = TOPO[s.topology] || TOPO["3P/480VAC"];
+    var mat = s.material === "AL" ? "AL" : "CU";
+    var kw = Number(s.kw || 0);
+    var ft = Number(s.length_ft || 0);
+    var fla = sp.dc ? (kw * 1000 / sp.v) : (sp.ph === 3 ? (kw * 1000 / (Math.sqrt(3) * sp.v)) : (kw * 1000 / sp.v));
+    var des = fla * (s.continuous ? 1.25 : 1.0);
+    totKw += kw; totDes += des;
 
-      var w60 = WIRE_DB[WIRE_DB.length - 1][0], w75 = w60, w90 = w60;
-      for (var j = 0; j < WIRE_DB.length; j++) {
-        var ta = tempAmps(WIRE_DB[j], mat);
-        var e60 = cap2404d(WIRE_DB[j][0], ta[0], mat === "AL");
-        var e75 = cap2404d(WIRE_DB[j][0], ta[1], mat === "AL");
-        var e90 = cap2404d(WIRE_DB[j][0], ta[2] * k90, mat === "AL");
-        if (e60 >= des && w60 === WIRE_DB[WIRE_DB.length - 1][0]) w60 = WIRE_DB[j][0];
-        if (e75 >= des && w75 === WIRE_DB[WIRE_DB.length - 1][0]) w75 = WIRE_DB[j][0];
-        if (e90 >= des && w90 === WIRE_DB[WIRE_DB.length - 1][0]) w90 = WIRE_DB[j][0];
-      }
-      var baseIdx = WIRE_DB.findIndex(function(x){ return x[0] === w75; });
-      if (baseIdx < 0) baseIdx = WIRE_DB.length - 1;
-      var idx = baseIdx;
-      if (autoVd && ft > 0) {
-        while (idx < WIRE_DB.length - 1 && vdCalc(idx, mat, fla, sp, ft).p > maxVd) idx++;
-      }
-      var egcAwg = des <= 20 ? "12 AWG" : (des <= 60 ? "10 AWG" : "8 AWG");
-      var egcIdx = WIRE_DB.findIndex(function(x){ return x[0] === egcAwg; });
-      if (egcIdx < 0) egcIdx = 2;
-      if (idx > baseIdx) {
-        var reqC = WIRE_DB[egcIdx][7] * (WIRE_DB[idx][7] / WIRE_DB[baseIdx][7]);
-        for (var g = egcIdx; g < WIRE_DB.length; g++) { if (WIRE_DB[g][7] >= reqC - 0.1) { egcIdx = g; break; } }
-      }
-      var vd = vdCalc(idx, mat, fla, sp, ft);
-      var ol = olPick(des, fla);
-      s.fla = fla; s.design_amps = des; s.wire_60c = w60; s.wire_75c = w75; s.wire_90c = w90;
-      s.wire_awg = WIRE_DB[idx][0]; s.egc_awg = WIRE_DB[egcIdx][0]; s.vd_volts = vd.v; s.vd_pct = vd.p;
-      s.emt_s = condPick("EMT", idx, sp.w, egcIdx);
-      s.rmc_s = condPick("RIGID", idx, sp.w, egcIdx);
-      s.pvc_s = condPick("PVC40", idx, sp.w, egcIdx);
-      s.ab_s = ol.ab; s.sqd_s = ol.sqd;
-
-      var topOpts = topKeys.map(function(k){ return '<option value="'+k+'"'+(s.topology===k?' selected':'')+'>'+k+'</option>'; }).join("");
-      var matOpts = '<option value="CU"'+(mat==='CU'?' selected':'')+'>Cu</option><option value="AL"'+(mat==='AL'?' selected':'')+'>Al</option>';
-      var vdCls = vd.p > maxVd ? "pill-hi" : "pill-o";
-
-      var tr = document.createElement("tr");
-      tr.innerHTML =
-        '<td class="mono"><b>'+s.ref+'</b></td>' +
-        '<td>'+s.name+'</td>' +
-        '<td><select class="sel" onchange="upd('+i+','topology',this.value)">'+topOpts+'</select></td>' +
-        '<td><select class="sel" onchange="upd('+i+','material',this.value)">'+matOpts+'</select></td>' +
-        '<td><input class="in" type="number" step="0.5" value="'+s.kw+'" onchange="upd('+i+','kw',Number(this.value))"></td>' +
-        '<td><input class="in" type="number" step="10" value="'+s.length_ft+'" onchange="upd('+i+','length_ft',Number(this.value))"></td>' +
-        '<td><input type="checkbox"'+(s.continuous?' checked':'')+' onchange="upd('+i+','continuous',this.checked)"></td>' +
-        '<td class="mono">'+fla.toFixed(2)+'A / <b>'+des.toFixed(2)+'A</b></td>' +
-        '<td class="mono"><span class="pill-t">60°:'+w60.replace(" AWG","")+' · 75°:'+w75.replace(" AWG","")+' · 90°:'+w90.replace(" AWG","")+'</span></td>' +
-        '<td class="mono"><span class="pill-w">'+s.wire_awg+'</span> + '+s.egc_awg+'</td>' +
-        '<td class="mono"><span class="'+vdCls+'">'+vd.v.toFixed(1)+'V ('+vd.p.toFixed(2)+'%)</span></td>' +
-        '<td class="mono"><span class="pill-c">'+s.emt_s+'</span></td>' +
-        '<td class="mono"><span class="pill-c">'+s.rmc_s+'</span></td>' +
-        '<td class="mono"><span class="pill-c">'+s.pvc_s+'</span></td>' +
-        '<td class="mono"><span class="pill-o">'+s.ab_s+'</span></td>' +
-        '<td class="mono"><span class="pill-o">'+s.sqd_s+'</span></td>';
-      tb.appendChild(tr);
+    var w60 = WIRE_DB[WIRE_DB.length - 1][0], w75 = w60, w90 = w60;
+    for (var j = 0; j < WIRE_DB.length; j++) {
+      var ta = tempAmps(WIRE_DB[j], mat);
+      var e60 = cap2404d(WIRE_DB[j][0], ta[0], mat === "AL");
+      var e75 = cap2404d(WIRE_DB[j][0], ta[1], mat === "AL");
+      var e90 = cap2404d(WIRE_DB[j][0], ta[2] * k90, mat === "AL");
+      if (e60 >= des && w60 === WIRE_DB[WIRE_DB.length - 1][0]) w60 = WIRE_DB[j][0];
+      if (e75 >= des && w75 === WIRE_DB[WIRE_DB.length - 1][0]) w75 = WIRE_DB[j][0];
+      if (e90 >= des && w90 === WIRE_DB[WIRE_DB.length - 1][0]) w90 = WIRE_DB[j][0];
     }
-    document.getElementById("summary-txt").textContent = "Rows: "+ROWS.length+" | Total kW: "+totKw.toFixed(1)+" | Sum Design: "+totDes.toFixed(1)+"A";
-  } catch (err) {
-    var eb = document.getElementById("err-box");
-    eb.style.display = "block";
-    eb.textContent = "Render error: " + err.message;
+    var baseIdx = WIRE_DB.findIndex(function(x){ return x[0] === w75; });
+    if (baseIdx < 0) baseIdx = WIRE_DB.length - 1;
+    var idx = baseIdx;
+    if (autoVd && ft > 0) {
+      while (idx < WIRE_DB.length - 1 && vdCalc(idx, mat, fla, sp, ft).p > maxVd) idx++;
+    }
+    var egcAwg = des <= 20 ? "12 AWG" : (des <= 60 ? "10 AWG" : "8 AWG");
+    var egcIdx = WIRE_DB.findIndex(function(x){ return x[0] === egcAwg; });
+    if (egcIdx < 0) egcIdx = 2;
+    if (idx > baseIdx) {
+      var reqC = WIRE_DB[egcIdx][7] * (WIRE_DB[idx][7] / WIRE_DB[baseIdx][7]);
+      for (var g = egcIdx; g < WIRE_DB.length; g++) { if (WIRE_DB[g][7] >= reqC - 0.1) { egcIdx = g; break; } }
+    }
+    var vd = vdCalc(idx, mat, fla, sp, ft);
+    var ol = olPick(des, fla);
+    s.fla = fla; s.design_amps = des; s.wire_60c = w60; s.wire_75c = w75; s.wire_90c = w90;
+    s.wire_awg = WIRE_DB[idx][0]; s.egc_awg = WIRE_DB[egcIdx][0]; s.vd_volts = vd.v; s.vd_pct = vd.p;
+    s.emt_s = condPick("EMT", idx, sp.w, egcIdx);
+    s.rmc_s = condPick("RIGID", idx, sp.w, egcIdx);
+    s.pvc_s = condPick("PVC40", idx, sp.w, egcIdx);
+    s.ab_s = ol.ab; s.sqd_s = ol.sqd;
+
+    var topOpts = topKeys.map(function(k){ return '<option value="'+k+'"'+(s.topology===k?' selected':'')+'>'+k+'</option>'; }).join("");
+    var matOpts = '<option value="CU"'+(mat==='CU'?' selected':'')+'>Cu</option><option value="AL"'+(mat==='AL'?' selected':'')+'>Al</option>';
+    var vdCls = vd.p > maxVd ? "pill-hi" : "pill-o";
+
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="mono"><b>'+String(s.ref || ("L"+(i+1)))+'</b></td>' +
+      '<td>'+String(s.name || ("Load "+(i+1)))+'</td>' +
+      '<td><select class="sel" onchange="upd('+i+','topology',this.value)">'+topOpts+'</select></td>' +
+      '<td><select class="sel" onchange="upd('+i+','material',this.value)">'+matOpts+'</select></td>' +
+      '<td><input class="in" type="number" step="0.5" value="'+kw+'" onchange="upd('+i+','kw',Number(this.value))"></td>' +
+      '<td><input class="in" type="number" step="10" value="'+ft+'" onchange="upd('+i+','length_ft',Number(this.value))"></td>' +
+      '<td><input type="checkbox"'+(s.continuous?' checked':'')+' onchange="upd('+i+','continuous',this.checked)"></td>' +
+      '<td class="mono">'+fla.toFixed(2)+'A / <b>'+des.toFixed(2)+'A</b></td>' +
+      '<td class="mono"><span class="pill-t">60°:'+w60.replace(" AWG","")+' · 75°:'+w75.replace(" AWG","")+' · 90°:'+w90.replace(" AWG","")+'</span></td>' +
+      '<td class="mono"><span class="pill-w">'+s.wire_awg+'</span> + '+s.egc_awg+'</td>' +
+      '<td class="mono"><span class="'+vdCls+'">'+vd.v.toFixed(1)+'V ('+vd.p.toFixed(2)+'%)</span></td>' +
+      '<td class="mono"><span class="pill-c">'+s.emt_s+'</span></td>' +
+      '<td class="mono"><span class="pill-c">'+s.rmc_s+'</span></td>' +
+      '<td class="mono"><span class="pill-c">'+s.pvc_s+'</span></td>' +
+      '<td class="mono"><span class="pill-o">'+s.ab_s+'</span></td>' +
+      '<td class="mono"><span class="pill-o">'+s.sqd_s+'</span></td>';
+    tb.appendChild(tr);
   }
+  document.getElementById("summary-txt").textContent = "Rows: "+ROWS.length+" | Total kW: "+totKw.toFixed(1)+" | Sum Design: "+totDes.toFixed(1)+"A";
 }
 function downloadCSV() {
   var hdr = ["Ref,Topology,Material,kW,Feet,FLA,Design_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
@@ -313,8 +313,12 @@ function downloadCSV() {
   a.download = "nec_schedule_standalone.csv";
   a.click();
 }
-recalc();
-if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }); }
+try {
+  recalc();
+} catch (initErr) {
+  var eb = document.getElementById("err-box");
+  if (eb) { eb.style.display = "block"; eb.textContent = "Init error: " + initErr.message; }
+}
 </script>
 </body>
 </html>
