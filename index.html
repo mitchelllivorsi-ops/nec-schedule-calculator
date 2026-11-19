@@ -51,6 +51,12 @@
   .stat-sub { font-size:11px; color:#94a3b8; margin-top:4px; }
   .formula-strip { background:#0f172a; border:1px solid #334155; border-left:3px solid #38bdf8; border-radius:6px; padding:8px 12px; margin-top:10px; font-size:12px; color:#cbd5e1; line-height:1.5; }
   .formula-strip.amber { border-left-color:#f59e0b; }
+  .nav-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .tab-btn { background:#1e293b; color:#cbd5e1; border:1px solid #334155; border-radius:999px; padding:6px 13px; font-size:12px; font-weight:600; cursor:pointer; }
+  .tab-btn:hover { border-color:#38bdf8; color:#f8fafc; }
+  .tab-btn.active { background:#0284c7; border-color:#38bdf8; color:#fff; }
+  .card.tab-hidden { display:none; }
+  .formula-strip.emerald { border-left-color:#10b981; }
   @media (max-width: 768px) {
     body { padding:12px 10px; }
     h1 { font-size:16px; }
@@ -84,7 +90,59 @@
   </div>
 </header>
 
-<div class="card">
+<div class="nav-tabs" id="view-tabs">
+  <button class="tab-btn active" data-tab="all">All Sections</button>
+  <button class="tab-btn" data-tab="quick">Quick Field Lookup</button>
+  <button class="tab-btn" data-tab="schedule">Branch Schedule</button>
+  <button class="tab-btn" data-tab="feeder">Main Feeder</button>
+  <button class="tab-btn" data-tab="transformer">Transformer &amp; SCA</button>
+  <button class="tab-btn" data-tab="raceway">Shared Raceway</button>
+</div>
+
+<div class="card" id="card-quick" data-section="quick">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h2>Quick Wire &amp; Conduit Field Lookup (One-Off Amps / Feet / Voltage Check)</h2>
+      <div class="sub">Enter load amps, distance, and voltage for instant wire size (60/75/90&deg;C), OCPD (240.6), EGC (250.122), VD%, max run length, and 40% conduit fill.</div>
+    </div>
+    <div class="btn-row">
+      <button id="btn-ql-send" class="sec" title="Copy this field check into the Branch Schedule table">+ Send to Schedule</button>
+    </div>
+  </div>
+  <div class="bar" style="margin-top:10px;margin-bottom:0;">
+    <label>System:
+      <select id="ql-sys" class="sel">
+        <option value="3P_AC">3-Phase AC</option>
+        <option value="1P_AC">1-Phase AC</option>
+        <option value="DC">DC</option>
+      </select>
+    </label>
+    <label>Volts (V):
+      <input id="ql-volts" class="in" list="ql-vlist" type="number" step="1" min="1" value="480">
+      <datalist id="ql-vlist">
+        <option value="120"></option><option value="208"></option><option value="240"></option>
+        <option value="250"></option><option value="277"></option><option value="480"></option><option value="600"></option>
+      </datalist>
+    </label>
+    <label>Load (Amps): <input id="ql-amps" class="in" type="number" step="0.5" min="0" value="40"></label>
+    <label>Feet (1-Way): <input id="ql-ft" class="in" type="number" step="10" min="0" value="100"></label>
+    <label>Mat:
+      <select id="ql-mat" class="sel">
+        <option value="CU">Cu</option>
+        <option value="AL">Al</option>
+      </select>
+    </label>
+    <label>PF: <input id="ql-pf" class="in" style="width:56px;" type="number" step="0.05" min="0.5" max="1.0" value="0.90"></label>
+    <label>Max VD%: <input id="ql-maxvd" class="in" style="width:54px;" type="number" step="0.5" min="0.5" max="10" value="3.0"></label>
+    <label><input id="ql-cont" type="checkbox" checked> 125% Cont</label>
+    <label><input id="ql-autovd" type="checkbox" checked> Auto-Upsize VD</label>
+    <label title="Adds 1 extra conductor (e.g. neutral) to conduit fill"><input id="ql-neutral" type="checkbox"> +1 Neutral (Fill)</label>
+  </div>
+  <div id="ql-formula" class="formula-strip emerald mono"></div>
+  <div id="ql-summary" class="grid-boxes"></div>
+</div>
+
+<div class="card" id="card-schedule" data-section="schedule">
   <div class="bar">
     <label>Project: <input id="project-title" class="desc" style="width:210px;" type="text" value="NEC Multi-Topology Electrical Design Schedule"></label>
     <label>Global Material:
@@ -138,7 +196,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="card-feeder" data-section="feeder">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
       <h2>Main Feeder Summary (NEC 430.24 Combined Conductors &amp; NEC 430.62 / 430.63 Max OCPD)</h2>
@@ -173,7 +231,7 @@
   <div id="feeder-summary" class="grid-boxes"></div>
 </div>
 
-<div class="card">
+<div class="card" id="card-transformer" data-section="transformer">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
       <h2>3-Phase / 1-Phase Step-Down &amp; Control Transformer Sizing (NEC Table 450.3(B))</h2>
@@ -259,7 +317,7 @@
   <div id="xfmr-summary" class="grid-boxes"></div>
 </div>
 
-<div class="card">
+<div class="card" id="card-raceway" data-section="raceway">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
       <h2>Shared Multi-Circuit Conduit Fill Calculator (NEC Ch. 9, 250.122(C) &amp; 310.15(C)(1))</h2>
@@ -868,6 +926,191 @@
     ]);
   }
 
+  var QL_KEY = "nec_quick_lookup_v15";
+  var TAB_KEY = "nec_active_tab_v15";
+
+  function applyActiveTab(tabName) {
+    var btns = document.querySelectorAll("#view-tabs .tab-btn");
+    var cards = document.querySelectorAll(".card[data-section]");
+    for (var b = 0; b < btns.length; b++) {
+      var isMatch = btns[b].getAttribute("data-tab") === tabName;
+      if (isMatch) btns[b].classList.add("active");
+      else btns[b].classList.remove("active");
+    }
+    for (var c = 0; c < cards.length; c++) {
+      var sec = cards[c].getAttribute("data-section");
+      if (tabName === "all" || sec === tabName) cards[c].classList.remove("tab-hidden");
+      else cards[c].classList.add("tab-hidden");
+    }
+    try { localStorage.setItem(TAB_KEY, tabName); } catch (e) {}
+  }
+
+  function saveQuickLookupLocal() {
+    try {
+      localStorage.setItem(QL_KEY, JSON.stringify({
+        sys: document.getElementById("ql-sys").value,
+        volts: document.getElementById("ql-volts").value,
+        amps: document.getElementById("ql-amps").value,
+        ft: document.getElementById("ql-ft").value,
+        mat: document.getElementById("ql-mat").value,
+        pf: document.getElementById("ql-pf").value,
+        maxvd: document.getElementById("ql-maxvd").value,
+        cont: document.getElementById("ql-cont").checked,
+        autovd: document.getElementById("ql-autovd").checked,
+        neutral: document.getElementById("ql-neutral").checked
+      }));
+    } catch (e) {}
+  }
+
+  function loadQuickLookupLocal() {
+    try {
+      var raw = localStorage.getItem(QL_KEY);
+      if (raw) {
+        var q = JSON.parse(raw);
+        if (q.sys) document.getElementById("ql-sys").value = q.sys;
+        if (q.volts !== undefined) document.getElementById("ql-volts").value = String(q.volts);
+        if (q.amps !== undefined) document.getElementById("ql-amps").value = String(q.amps);
+        if (q.ft !== undefined) document.getElementById("ql-ft").value = String(q.ft);
+        if (q.mat === "CU" || q.mat === "AL") document.getElementById("ql-mat").value = q.mat;
+        if (q.pf !== undefined) document.getElementById("ql-pf").value = String(q.pf);
+        if (q.maxvd !== undefined) document.getElementById("ql-maxvd").value = String(q.maxvd);
+        if (q.cont !== undefined) document.getElementById("ql-cont").checked = Boolean(q.cont);
+        if (q.autovd !== undefined) document.getElementById("ql-autovd").checked = Boolean(q.autovd);
+        if (q.neutral !== undefined) document.getElementById("ql-neutral").checked = Boolean(q.neutral);
+      }
+      var savedTab = localStorage.getItem(TAB_KEY);
+      if (savedTab) applyActiveTab(savedTab);
+    } catch (e) {}
+  }
+
+  function renderQuickLookup(ambC) {
+    var sys = document.getElementById("ql-sys").value;
+    var volts = Math.max(1, Number(document.getElementById("ql-volts").value || 480));
+    var amps = Math.max(0, Number(document.getElementById("ql-amps").value || 0));
+    var ft = Math.max(0, Number(document.getElementById("ql-ft").value || 0));
+    var mat = document.getElementById("ql-mat").value === "AL" ? "AL" : "CU";
+    var matLbl = mat === "AL" ? "Al" : "Cu";
+    var isDc = sys === "DC";
+    var ph = sys === "3P_AC" ? 3 : 1;
+    var pf = isDc ? 1.0 : Math.max(0.1, Math.min(1.0, Number(document.getElementById("ql-pf").value || 0.90)));
+    var maxVd = Math.max(0.5, Number(document.getElementById("ql-maxvd").value || 3.0));
+    var cont = document.getElementById("ql-cont").checked;
+    var autoVd = document.getElementById("ql-autovd").checked;
+    var extraN = document.getElementById("ql-neutral").checked;
+
+    var sp = { ph: ph, v: volts, dc: isDc, w: ph === 3 ? 3 : 2 };
+    var designA = amps * (cont ? 1.25 : 1.0);
+    var ocpd = pickUp(designA, STD_OCPD);
+    var kAmb = k90Factor(ambC);
+
+    var minPar = WIRE_DB.findIndex(function(x){ return x.awg === "1/0 AWG"; });
+    var chosenSets = 1, baseIdx = WIRE_DB.length - 1, finalIdx = baseIdx;
+    var w60 = WIRE_DB[baseIdx].awg, w75 = w60, w90 = w60;
+
+    for (var sets = 1; sets <= 6; sets++) {
+      var startI = sets === 1 ? 0 : minPar;
+      var perSet = designA / sets;
+      var foundBase = -1, t60 = "", t75 = "", t90 = "";
+      for (var w = startI; w < WIRE_DB.length; w++) {
+        var wr = WIRE_DB[w];
+        var a60 = mat === "AL" ? wr.al60 : wr.cu60;
+        var a75 = mat === "AL" ? wr.al75 : wr.cu75;
+        var a90 = mat === "AL" ? wr.al90 : wr.cu90;
+        var e60 = cap2404d(wr.awg, a60, mat === "AL", false);
+        var e75 = cap2404d(wr.awg, a75, mat === "AL", false);
+        var e90 = cap2404d(wr.awg, a90 * kAmb, mat === "AL", false);
+        if (t60 === "" && e60 >= perSet) t60 = wr.awg;
+        if (t75 === "" && e75 >= perSet) t75 = wr.awg;
+        if (t90 === "" && e90 >= perSet) t90 = wr.awg;
+        if (foundBase < 0 && Math.min(e75, e90) >= perSet) foundBase = w;
+      }
+      if (foundBase < 0) continue;
+
+      var fIdx = foundBase;
+      if (autoVd && ft > 0) {
+        while (fIdx < WIRE_DB.length - 1 && vdCalc(fIdx, mat, amps / sets, sp, ft, pf).p > maxVd) fIdx++;
+      }
+      var testVd = vdCalc(fIdx, mat, amps / sets, sp, ft, pf);
+      chosenSets = sets; baseIdx = foundBase; finalIdx = fIdx;
+      w60 = t60 || "Parallel"; w75 = t75 || WIRE_DB[foundBase].awg; w90 = t90 || WIRE_DB[foundBase].awg;
+      if ((autoVd === false) || testVd.p <= maxVd || sets === 6) break;
+    }
+
+    var egcIdx = pickEgcIdx(ocpd, mat, baseIdx, finalIdx, chosenSets);
+    var vd = vdCalc(finalIdx, mat, amps / chosenSets, sp, ft, pf);
+    var wFinal = WIRE_DB[finalIdx];
+
+    var r75 = mat === "AL" ? wFinal.rAl : wFinal.rCu;
+    var sinT = Math.sqrt(Math.max(0.0, 1.0 - pf * pf));
+    var zEff = isDc ? r75 : (r75 * pf + wFinal.xL * sinT);
+    var mult = isDc ? 2.0 : (ph === 3 ? Math.sqrt(3.0) : 2.0);
+    var denomFt = mult * (amps / chosenSets) * zEff;
+    var maxFt = denomFt > 0 ? (((maxVd / 100.0) * volts * 1000.0) / denomFt) : 0;
+
+    var kva = isDc ? ((volts * amps) / 1000.0) : ((ph === 3 ? Math.sqrt(3.0) : 1.0) * volts * amps / 1000.0);
+    var kw = kva * pf;
+
+    var cktWires = sp.w + (extraN ? 1 : 0);
+    var totArea = (cktWires * wFinal.area) + WIRE_DB[egcIdx].area;
+    var emtQ = condPickByArea("EMT", totArea);
+    var rmcQ = condPickByArea("RIGID", totArea);
+    var pvcQ = condPickByArea("PVC40", totArea);
+
+    var pfx = chosenSets > 1 ? (chosenSets + "x ") : "";
+    var sysLbl = sys === "3P_AC" ? "3P AC" : (sys === "1P_AC" ? "1P AC" : "DC");
+    var wireSub = finalIdx > baseIdx
+      ? ("Upsized from " + WIRE_DB[baseIdx].awg + " for VD | 250.122(B) EGC applied")
+      : ("Ampacity-governed @ " + ambC + "C ambient | " + (chosenSets > 1 ? "250.122(F) EGC/run" : "NEC 250.122"));
+
+    document.getElementById("ql-formula").textContent =
+      "FIELD CHECK [" + sysLbl + " " + volts + "V | " + amps.toFixed(1) + "A @ " + ft + " ft | " + matLbl + "]: " +
+      "Design = " + designA.toFixed(1) + "A -> " + ocpd + "A OCPD | " +
+      pfx + wFinal.awg + " + " + WIRE_DB[egcIdx].awg + " EGC | " +
+      "VD = " + vd.v.toFixed(1) + "V (" + vd.p.toFixed(2) + "%) | " +
+      "Max Run @ " + maxVd.toFixed(1) + "% VD = " + Math.round(maxFt).toLocaleString() + " ft | " + emtQ.text;
+
+    buildStatCards(document.getElementById("ql-summary"), [
+      {
+        lbl: "Design Amps & Standard OCPD (NEC 240.6)",
+        val: designA.toFixed(1) + " A  ->  " + ocpd + " A OCPD",
+        sub: "Load: " + amps.toFixed(1) + " A | " + kw.toFixed(2) + " kW (" + kva.toFixed(2) + " kVA @ PF " + pf.toFixed(2) + ")",
+        cls: "pill-m"
+      },
+      {
+        lbl: "Wire Size by Temp (" + (chosenSets > 1 ? (chosenSets + " Parallel Sets") : "Single Set") + ")",
+        val: "60C:" + w60.replace(" AWG","") + " | 75C:" + w75.replace(" AWG","") + " | 90C:" + w90.replace(" AWG",""),
+        sub: "Material: " + matLbl + " | NEC 240.4(D) small-wire caps applied",
+        cls: "pill-t"
+      },
+      {
+        lbl: "Selected Wire + EGC (NEC 250.122)",
+        val: pfx + wFinal.awg + " " + matLbl + " + " + WIRE_DB[egcIdx].awg + " EGC",
+        sub: wireSub,
+        cls: "pill-w"
+      },
+      {
+        lbl: "Voltage Drop @ " + ft + " ft (Max " + maxVd.toFixed(1) + "%)",
+        val: vd.v.toFixed(1) + " V (" + vd.p.toFixed(2) + "%)",
+        sub: "Max 1-way run @ " + maxVd.toFixed(1) + "% VD: " + Math.round(maxFt).toLocaleString() + " ft on " + pfx + wFinal.awg,
+        cls: vd.p > maxVd ? "pill-hi" : "pill-o"
+      },
+      {
+        lbl: "EMT Conduit Fill (40% Max" + (chosenSets > 1 ? ", Per Set" : "") + ")",
+        val: emtQ.text,
+        sub: cktWires + " circuit wires + 1 EGC = " + totArea.toFixed(4) + " in2 (THWN-2)",
+        cls: emtQ.over ? "pill-hi" : "pill-c"
+      },
+      {
+        lbl: "Rigid RMC & PVC Sch 40 (40% Max)",
+        val: rmcQ.text,
+        sub: "PVC Sch 40: " + pvcQ.text,
+        cls: (rmcQ.over || pvcQ.over) ? "pill-hi" : "pill-c"
+      }
+    ]);
+
+    saveQuickLookupLocal();
+  }
+
   function renderFeederSummary(ambC, maxVd, autoVd) {
     var fTopo = document.getElementById("feeder-topo").value;
     var fScope = document.getElementById("feeder-scope").value;
@@ -1248,6 +1491,7 @@
     document.getElementById("summary-txt").textContent =
       "Rows: " + ROWS.length + " | Total kW: " + totKw.toFixed(1) + " | Sum Design: " + totDes.toFixed(1) + "A";
 
+    renderQuickLookup(amb);
     renderFeederSummary(amb, maxVd, autoVd);
     renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
@@ -1593,6 +1837,56 @@
   };
 
   loadSettingsLocal();
+
+  var tabBtns = document.querySelectorAll("#view-tabs .tab-btn");
+  for (var tbIdx = 0; tbIdx < tabBtns.length; tbIdx++) {
+    tabBtns[tbIdx].onclick = function() { applyActiveTab(this.getAttribute("data-tab")); };
+  }
+
+  ["ql-sys","ql-volts","ql-amps","ql-ft","ql-mat","ql-pf","ql-maxvd","ql-cont","ql-autovd","ql-neutral"].forEach(function(id){
+    document.getElementById(id).onchange = function() {
+      renderQuickLookup(Number(document.getElementById("amb-c").value || 40));
+    };
+  });
+
+  document.getElementById("btn-ql-send").onclick = function() {
+    var sys = document.getElementById("ql-sys").value;
+    var volts = Number(document.getElementById("ql-volts").value || 480);
+    var amps = Number(document.getElementById("ql-amps").value || 0);
+    var ft = Number(document.getElementById("ql-ft").value || 100);
+    var mat = document.getElementById("ql-mat").value === "AL" ? "AL" : "CU";
+    var cont = document.getElementById("ql-cont").checked;
+
+    var mappedTopo = "3P/480VAC";
+    if (sys === "DC") mappedTopo = "250VDC";
+    else if (sys === "3P_AC") mappedTopo = volts <= 300 ? "3P/240VAC" : "3P/480VAC";
+    else mappedTopo = volts <= 150 ? "1P/120VAC" : "1P/240VAC";
+
+    var spTarget = TOPO[mappedTopo];
+    var calcKw = spTarget.dc
+      ? ((spTarget.v * amps) / 1000.0)
+      : ((spTarget.ph === 3 ? Math.sqrt(3.0) : 1.0) * spTarget.v * amps / 1000.0);
+
+    var n = ROWS.length + 1;
+    ROWS.push({
+      ref: "L" + n,
+      name: "Field Check (" + amps.toFixed(0) + "A @ " + volts + "V)",
+      topology: mappedTopo,
+      motor_hp: "",
+      material: mat,
+      in_raceway: false,
+      kw: Number(calcKw.toFixed(2)),
+      length_ft: ft,
+      continuous: cont
+    });
+    recalc();
+    if (typeof showNotice === "function") {
+      showNotice("Added L" + n + " (" + amps.toFixed(1) + "A -> " + mappedTopo + ") to Branch Schedule.", false);
+    }
+  };
+
+  loadQuickLookupLocal();
+
 
   document.getElementById("btn-csv").onclick = function() {
     var hdr = ["Ref,Description,Topology,Motor_HP,Material,kW,Feet,FLA,Design_A,OCPD_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC_250_122,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
