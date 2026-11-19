@@ -1,1 +1,38 @@
-{"name": "NEC Schedule Standalone", "short_name": "NEC Schedule", "start_url": "./", "display": "standalone", "background_color": "#0f172a", "theme_color": "#0f172a"}
+{
+  "id": "/nec-schedule-calculator/",
+  "name": "NEC Schedule Calculator",
+  "short_name": "NEC Schedule",
+  "description": "Multi-topology NEC 220/424/430 conductor, 250.122 EGC, conduit fill & overload schedule.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

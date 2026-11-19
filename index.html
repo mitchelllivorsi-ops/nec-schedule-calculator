@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>NEC Multi-Topology Schedule (Cu/Al, 60/75/90C, EMT/RMC/PVC, AB & SqD OL)</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>NEC Multi-Topology Schedule (Cu/Al, 60/75/90C, EMT/RMC/PVC, AB &amp; SqD OL)</title>
 <style>
   :root { --bg:#0f172a; --panel:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; }
   * { box-sizing:border-box; }
@@ -14,9 +20,10 @@
   .btn-row { display:flex; gap:8px; flex-wrap:wrap; }
   button { background:#0284c7; color:#fff; border:1px solid #38bdf8; border-radius:6px; padding:7px 12px; font-size:12px; font-weight:600; cursor:pointer; }
   button.sec { background:#334155; border-color:#475569; }
+  button.install { background:#059669; border-color:#34d399; display:none; }
   .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
   .bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:#0f172a; border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:12px; font-size:12px; }
-  .wrap { width:100%; overflow-x:auto; }
+  .wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
   table { width:100%; border-collapse:collapse; font-size:12px; }
   th, td { padding:7px 8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
   th { color:var(--muted); background:rgba(15,23,42,0.75); }
@@ -28,15 +35,22 @@
   .pill-c { background:rgba(168,85,247,0.16); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 6px; border-radius:4px; }
   .pill-o { background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.35); padding:2px 6px; border-radius:4px; }
   .pill-hi { background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.45); padding:2px 6px; border-radius:4px; font-weight:600; }
+  @media (max-width: 768px) {
+    body { padding:12px 10px; }
+    h1 { font-size:16px; }
+    button { min-height:40px; }
+    input.in, select.sel { min-height:36px; font-size:13px; }
+  }
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>NEC Article 220/424/430 Conductor, Temp Breakdown, Conduit Fill &amp; Overload Schedule</h1>
-    <div class="sub">Standalone Calculator &mdash; 3P/480V, 3P/240V, 1P/240V, 1P/120V &amp; 250VDC | Copper &amp; Aluminum | 60&deg;C/75&deg;C/90&deg;C | EMT/Rigid/PVC Fill | AB &amp; Square D</div>
+    <div class="sub">Standalone Calculator &mdash; 3P/480V, 3P/240V, 1P/240V, 1P/120V &amp; 250VDC | Cu/Al | NEC 250.122 EGC | EMT/Rigid/PVC | AB &amp; Square D</div>
   </div>
   <div class="btn-row">
+    <button id="btn-install" class="install">Install App</button>
     <button id="btn-csv">Download CSV</button>
     <button id="btn-print" class="sec">Print</button>
     <button id="btn-add" class="sec">+ Add Row</button>
@@ -53,7 +67,7 @@
     </label>
     <label>Ambient (&deg;C): <input id="amb-c" class="in" type="number" value="40"></label>
     <label>Max VD (%): <input id="max-vd" class="in" type="number" step="0.5" value="3.0"></label>
-    <label><input id="auto-vd" type="checkbox" checked> Auto-Upsize Wire &amp; EGC for VD</label>
+    <label><input id="auto-vd" type="checkbox" checked> Auto-Upsize Wire &amp; EGC for VD (250.122(B))</label>
     <span id="summary-txt" class="mono" style="color:#38bdf8;margin-left:auto;"></span>
   </div>
   <div id="err-box" style="display:none;color:#fca5a5;background:rgba(239,68,68,0.2);padding:8px;border-radius:6px;margin-bottom:10px;font-family:monospace;font-size:12px;"></div>
@@ -69,8 +83,9 @@
           <th>Feet</th>
           <th>125% Cont</th>
           <th>FLA / Design</th>
+          <th>OCPD (240.6)</th>
           <th>60&deg;C / 75&deg;C / 90&deg;C</th>
-          <th>Final Wire + EGC</th>
+          <th>Final Wire + EGC (250.122)</th>
           <th>Voltage Drop</th>
           <th>EMT (40%)</th>
           <th>Rigid RMC (40%)</th>
@@ -84,7 +99,7 @@
   </div>
 </div>
 
-<script id="init-data" type="application/json">[{"ref": "L1", "name": "3P/480V Load", "topology": "3P/480VAC", "material": "CU", "kw": 12.0, "length_ft": 125.0, "continuous": true, "fla": 14.43, "design_amps": 18.04, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "12 AWG", "egc_awg": "12 AWG", "upsized_for_vd": false, "vd_volts": 6.25, "vd_pct": 1.3, "emt_trade": "1/2\" EMT", "emt_fill_pct": 17.5, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 16.9, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 18.7, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L2", "name": "3P/240V Load", "topology": "3P/240VAC", "material": "CU", "kw": 10.0, "length_ft": 120.0, "continuous": true, "fla": 24.06, "design_amps": 30.07, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.63, "emt_trade": "3/4\" EMT", "emt_fill_pct": 24.6, "rmc_trade": "3/4\" RMC", "rmc_fill_pct": 23.8, "pvc_trade": "3/4\" PVC40", "pvc_fill_pct": 25.8, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L3", "name": "1P/240V Load", "topology": "1P/240VAC", "material": "CU", "kw": 6.0, "length_ft": 100.0, "continuous": true, "fla": 25.0, "design_amps": 31.25, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.62, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L4", "name": "1P/120V Load", "topology": "1P/120VAC", "material": "CU", "kw": 1.8, "length_ft": 80.0, "continuous": true, "fla": 15.0, "design_amps": 18.75, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "10 AWG", "egc_awg": "10 AWG", "upsized_for_vd": true, "vd_volts": 2.88, "vd_pct": 2.4, "emt_trade": "1/2\" EMT", "emt_fill_pct": 20.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 20.2, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 22.2, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L5", "name": "250VDC Load", "topology": "250VDC", "material": "CU", "kw": 8.0, "length_ft": 110.0, "continuous": true, "fla": 32.0, "design_amps": 40.0, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 5.49, "vd_pct": 2.2, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}]</script>
+<script id="init-data" type="application/json">[{"ref": "L1", "name": "3P/480V Load", "topology": "3P/480VAC", "material": "CU", "kw": 12.0, "length_ft": 125.0, "continuous": true, "fla": 14.43, "design_amps": 18.04, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "12 AWG", "egc_awg": "12 AWG", "upsized_for_vd": false, "vd_volts": 6.25, "vd_pct": 1.3, "emt_trade": "1/2\" EMT", "emt_fill_pct": 17.5, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 16.9, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 18.7, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L2", "name": "3P/240V Load", "topology": "3P/240VAC", "material": "CU", "kw": 10.0, "length_ft": 120.0, "continuous": true, "fla": 24.06, "design_amps": 30.07, "ocpd_amps": 35, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.63, "emt_trade": "3/4\" EMT", "emt_fill_pct": 24.6, "rmc_trade": "3/4\" RMC", "rmc_fill_pct": 23.8, "pvc_trade": "3/4\" PVC40", "pvc_fill_pct": 25.8, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L3", "name": "1P/240V Load", "topology": "1P/240VAC", "material": "CU", "kw": 6.0, "length_ft": 100.0, "continuous": true, "fla": 25.0, "design_amps": 31.25, "ocpd_amps": 35, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 3.9, "vd_pct": 1.62, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC1AL (23.0-32.0A)", "sqd_overload": "SqD LRD32 (23.0-32.0A)", "ol_range": "23.0-32.0A"}, {"ref": "L4", "name": "1P/120V Load", "topology": "1P/120VAC", "material": "CU", "kw": 1.8, "length_ft": 80.0, "continuous": true, "fla": 15.0, "design_amps": 18.75, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "10 AWG", "egc_awg": "10 AWG", "upsized_for_vd": true, "vd_volts": 2.88, "vd_pct": 2.4, "emt_trade": "1/2\" EMT", "emt_fill_pct": 20.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 20.2, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 22.2, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L5", "name": "250VDC Load", "topology": "250VDC", "material": "CU", "kw": 8.0, "length_ft": 110.0, "continuous": true, "fla": 32.0, "design_amps": 40.0, "ocpd_amps": 40, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 5.49, "vd_pct": 2.2, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}]</script>
 
 <script>
 (function() {
@@ -116,57 +131,86 @@
   };
 
   var WIRE_DB = [
-    ["14 AWG",     15,  20,  25,   0,   0,   0,   4110, 3.100, 5.100, 0.058, 0.0097],
-    ["12 AWG",     20,  25,  30,  15,  20,  25,   6530, 2.000, 3.200, 0.054, 0.0133],
-    ["10 AWG",     30,  35,  40,  25,  30,  35,  10380, 1.200, 2.000, 0.050, 0.0211],
-    ["8 AWG",      40,  50,  55,  30,  40,  45,  16510, 0.780, 1.300, 0.052, 0.0366],
-    ["6 AWG",      55,  65,  75,  40,  50,  55,  26240, 0.490, 0.810, 0.051, 0.0507],
-    ["4 AWG",      70,  85,  95,  55,  65,  75,  41740, 0.310, 0.510, 0.048, 0.0824],
-    ["3 AWG",      85, 100, 115,  65,  75,  85,  52620, 0.250, 0.400, 0.047, 0.0973],
-    ["2 AWG",      95, 115, 130,  75,  90, 100,  66360, 0.200, 0.320, 0.045, 0.1158],
-    ["1 AWG",     110, 130, 145,  85, 100, 115,  83690, 0.160, 0.250, 0.046, 0.1562],
-    ["1/0 AWG",   125, 150, 170, 100, 120, 135, 105600, 0.120, 0.200, 0.044, 0.1855],
-    ["2/0 AWG",   145, 175, 195, 115, 135, 150, 133100, 0.100, 0.160, 0.043, 0.2223],
-    ["3/0 AWG",   165, 200, 225, 130, 155, 175, 167800, 0.079, 0.130, 0.042, 0.2679],
-    ["4/0 AWG",   195, 230, 260, 150, 180, 205, 211600, 0.063, 0.100, 0.041, 0.3237],
-    ["250 kcmil", 215, 255, 290, 170, 205, 230, 250000, 0.054, 0.085, 0.041, 0.3970],
-    ["300 kcmil", 240, 285, 320, 190, 230, 260, 300000, 0.045, 0.071, 0.041, 0.4608]
+    { awg:"14 AWG",    cu60:15,  cu75:20,  cu90:25,  al60:0,   al75:0,   al90:0,   cmil:4110,   rCu:3.100, rAl:5.100, xL:0.058, area:0.0097 },
+    { awg:"12 AWG",    cu60:20,  cu75:25,  cu90:30,  al60:15,  al75:20,  al90:25,  cmil:6530,   rCu:2.000, rAl:3.200, xL:0.054, area:0.0133 },
+    { awg:"10 AWG",    cu60:30,  cu75:35,  cu90:40,  al60:25,  al75:30,  al90:35,  cmil:10380,  rCu:1.200, rAl:2.000, xL:0.050, area:0.0211 },
+    { awg:"8 AWG",     cu60:40,  cu75:50,  cu90:55,  al60:30,  al75:40,  al90:45,  cmil:16510,  rCu:0.780, rAl:1.300, xL:0.052, area:0.0366 },
+    { awg:"6 AWG",     cu60:55,  cu75:65,  cu90:75,  al60:40,  al75:50,  al90:55,  cmil:26240,  rCu:0.490, rAl:0.810, xL:0.051, area:0.0507 },
+    { awg:"4 AWG",     cu60:70,  cu75:85,  cu90:95,  al60:55,  al75:65,  al90:75,  cmil:41740,  rCu:0.310, rAl:0.510, xL:0.048, area:0.0824 },
+    { awg:"3 AWG",     cu60:85,  cu75:100, cu90:115, al60:65,  al75:75,  al90:85,  cmil:52620,  rCu:0.250, rAl:0.400, xL:0.047, area:0.0973 },
+    { awg:"2 AWG",     cu60:95,  cu75:115, cu90:130, al60:75,  al75:90,  al90:100, cmil:66360,  rCu:0.200, rAl:0.320, xL:0.045, area:0.1158 },
+    { awg:"1 AWG",     cu60:110, cu75:130, cu90:145, al60:85,  al75:100, al90:115, cmil:83690,  rCu:0.160, rAl:0.250, xL:0.046, area:0.1562 },
+    { awg:"1/0 AWG",   cu60:125, cu75:150, cu90:170, al60:100, al75:120, al90:135, cmil:105600, rCu:0.120, rAl:0.200, xL:0.044, area:0.1855 },
+    { awg:"2/0 AWG",   cu60:145, cu75:175, cu90:195, al60:115, al75:135, al90:150, cmil:133100, rCu:0.100, rAl:0.160, xL:0.043, area:0.2223 },
+    { awg:"3/0 AWG",   cu60:165, cu75:200, cu90:225, al60:130, al75:155, al90:175, cmil:167800, rCu:0.079, rAl:0.130, xL:0.042, area:0.2679 },
+    { awg:"4/0 AWG",   cu60:195, cu75:230, cu90:260, al60:150, al75:180, al90:205, cmil:211600, rCu:0.063, rAl:0.100, xL:0.041, area:0.3237 },
+    { awg:"250 kcmil", cu60:215, cu75:255, cu90:290, al60:170, al75:205, al90:230, cmil:250000, rCu:0.054, rAl:0.085, xL:0.041, area:0.3970 },
+    { awg:"300 kcmil", cu60:240, cu75:285, cu90:320, al60:190, al75:230, al90:260, cmil:300000, rCu:0.045, rAl:0.071, xL:0.041, area:0.4608 },
+    { awg:"350 kcmil", cu60:260, cu75:310, cu90:350, al60:210, al75:250, al90:280, cmil:350000, rCu:0.039, rAl:0.061, xL:0.040, area:0.5242 },
+    { awg:"400 kcmil", cu60:280, cu75:335, cu90:380, al60:225, al75:270, al90:305, cmil:400000, rCu:0.035, rAl:0.054, xL:0.040, area:0.5863 },
+    { awg:"500 kcmil", cu60:320, cu75:380, cu90:430, al60:260, al75:310, al90:350, cmil:500000, rCu:0.029, rAl:0.044, xL:0.039, area:0.7073 }
+  ];
+
+  var STD_OCPD = [15,20,25,30,35,40,45,50,60,70,80,90,100,110,125,150,175,200,225,250,300,350,400,450,500,600,700,800,1000,1200];
+
+  var NEC_250_122 = [
+    { max:15,   cu:"14 AWG",  al:"12 AWG" },
+    { max:20,   cu:"12 AWG",  al:"10 AWG" },
+    { max:60,   cu:"10 AWG",  al:"8 AWG" },
+    { max:100,  cu:"8 AWG",   al:"6 AWG" },
+    { max:200,  cu:"6 AWG",   al:"4 AWG" },
+    { max:300,  cu:"4 AWG",   al:"2 AWG" },
+    { max:400,  cu:"3 AWG",   al:"1 AWG" },
+    { max:500,  cu:"2 AWG",   al:"1/0 AWG" },
+    { max:600,  cu:"1 AWG",   al:"2/0 AWG" },
+    { max:800,  cu:"1/0 AWG", al:"3/0 AWG" },
+    { max:1000, cu:"2/0 AWG", al:"4/0 AWG" },
+    { max:1200, cu:"3/0 AWG", al:"250 kcmil" }
   ];
 
   var COND_TBLS = {
     EMT: [
-      ["1/2 in EMT", 0.122, 0.304], ["3/4 in EMT", 0.213, 0.533], ["1 in EMT", 0.346, 0.864],
-      ["1-1/4 in EMT", 0.598, 1.496], ["1-1/2 in EMT", 0.814, 2.036], ["2 in EMT", 1.342, 3.356],
-      ["2-1/2 in EMT", 2.343, 5.858], ["3 in EMT", 3.538, 8.846], ["4 in EMT", 5.901, 14.753]
+      { name:"1/2 in EMT", cap40:0.122, tot:0.304 }, { name:"3/4 in EMT", cap40:0.213, tot:0.533 },
+      { name:"1 in EMT", cap40:0.346, tot:0.864 }, { name:"1-1/4 in EMT", cap40:0.598, tot:1.496 },
+      { name:"1-1/2 in EMT", cap40:0.814, tot:2.036 }, { name:"2 in EMT", cap40:1.342, tot:3.356 },
+      { name:"2-1/2 in EMT", cap40:2.343, tot:5.858 }, { name:"3 in EMT", cap40:3.538, tot:8.846 },
+      { name:"3-1/2 in EMT", cap40:4.618, tot:11.545 }, { name:"4 in EMT", cap40:5.901, tot:14.753 }
     ],
     RIGID: [
-      ["1/2 in RMC", 0.125, 0.314], ["3/4 in RMC", 0.220, 0.549], ["1 in RMC", 0.355, 0.887],
-      ["1-1/4 in RMC", 0.610, 1.526], ["1-1/2 in RMC", 0.829, 2.071], ["2 in RMC", 1.363, 3.408],
-      ["2-1/2 in RMC", 1.943, 4.857], ["3 in RMC", 3.002, 7.504], ["4 in RMC", 5.172, 12.930]
+      { name:"1/2 in RMC", cap40:0.125, tot:0.314 }, { name:"3/4 in RMC", cap40:0.220, tot:0.549 },
+      { name:"1 in RMC", cap40:0.355, tot:0.887 }, { name:"1-1/4 in RMC", cap40:0.610, tot:1.526 },
+      { name:"1-1/2 in RMC", cap40:0.829, tot:2.071 }, { name:"2 in RMC", cap40:1.363, tot:3.408 },
+      { name:"2-1/2 in RMC", cap40:1.943, tot:4.857 }, { name:"3 in RMC", cap40:3.002, tot:7.504 },
+      { name:"3-1/2 in RMC", cap40:4.017, tot:10.042 }, { name:"4 in RMC", cap40:5.172, tot:12.930 }
     ],
     PVC40: [
-      ["1/2 in PVC40", 0.114, 0.285], ["3/4 in PVC40", 0.204, 0.508], ["1 in PVC40", 0.333, 0.832],
-      ["1-1/4 in PVC40", 0.583, 1.457], ["1-1/2 in PVC40", 0.794, 1.986], ["2 in PVC40", 1.316, 3.291],
-      ["2-1/2 in PVC40", 1.878, 4.695], ["3 in PVC40", 2.907, 7.268], ["4 in PVC40", 5.022, 12.554]
+      { name:"1/2 in PVC40", cap40:0.114, tot:0.285 }, { name:"3/4 in PVC40", cap40:0.204, tot:0.508 },
+      { name:"1 in PVC40", cap40:0.333, tot:0.832 }, { name:"1-1/4 in PVC40", cap40:0.583, tot:1.457 },
+      { name:"1-1/2 in PVC40", cap40:0.794, tot:1.986 }, { name:"2 in PVC40", cap40:1.316, tot:3.291 },
+      { name:"2-1/2 in PVC40", cap40:1.878, tot:4.695 }, { name:"3 in PVC40", cap40:2.907, tot:7.268 },
+      { name:"3-1/2 in PVC40", cap40:3.894, tot:9.737 }, { name:"4 in PVC40", cap40:5.022, tot:12.554 }
     ]
   };
 
   var OL_TBL = [
-    [1.0,   "193-EC1AB", "LRD05",   "0.63-1.0A"],
-    [1.6,   "193-EC1AC", "LRD06",   "1.0-1.6A"],
-    [2.5,   "193-EC1AD", "LRD07",   "1.6-2.5A"],
-    [4.0,   "193-EC1AE", "LRD08",   "2.5-4.0A"],
-    [6.3,   "193-EC1AF", "LRD10",   "4.0-6.0A"],
-    [10.0,  "193-EC1AG", "LRD14",   "7.0-10.0A"],
-    [13.0,  "193-EC1AH", "LRD16",   "9.0-13.0A"],
-    [18.0,  "193-EC1AJ", "LRD21",   "12.0-18.0A"],
-    [25.0,  "193-EC1AK", "LRD22",   "17.0-23.0A"],
-    [32.0,  "193-EC1AL", "LRD32",   "23.0-32.0A"],
-    [45.0,  "193-EC2AM", "LRD325",  "30.0-40.0A"],
-    [63.0,  "193-EC2AP", "LRD3365", "48.0-65.0A"],
-    [90.0,  "193-EC2AQ", "LRD340",  "55.0-70.0A"],
-    [115.0, "193-EC2AR", "LRD350",  "63.0-80.0A"],
-    [150.0, "193-EC2AS", "LRD365",  "80.0-104.0A"]
+    { max:1.0,   ab:"193-EC1AB", sqd:"LRD05",    rng:"0.63-1.0A" },
+    { max:1.6,   ab:"193-EC1AC", sqd:"LRD06",    rng:"1.0-1.6A" },
+    { max:2.5,   ab:"193-EC1AD", sqd:"LRD07",    rng:"1.6-2.5A" },
+    { max:4.0,   ab:"193-EC1AE", sqd:"LRD08",    rng:"2.5-4.0A" },
+    { max:6.3,   ab:"193-EC1AF", sqd:"LRD10",    rng:"4.0-6.0A" },
+    { max:10.0,  ab:"193-EC1AG", sqd:"LRD14",    rng:"7.0-10.0A" },
+    { max:13.0,  ab:"193-EC1AH", sqd:"LRD16",    rng:"9.0-13.0A" },
+    { max:18.0,  ab:"193-EC1AJ", sqd:"LRD21",    rng:"12.0-18.0A" },
+    { max:25.0,  ab:"193-EC1AK", sqd:"LRD22",    rng:"17.0-23.0A" },
+    { max:32.0,  ab:"193-EC1AL", sqd:"LRD32",    rng:"23.0-32.0A" },
+    { max:45.0,  ab:"193-EC2AM", sqd:"LRD325",   rng:"30.0-40.0A" },
+    { max:63.0,  ab:"193-EC2AP", sqd:"LRD3365",  rng:"48.0-65.0A" },
+    { max:90.0,  ab:"193-EC2AQ", sqd:"LRD340",   rng:"55.0-70.0A" },
+    { max:115.0, ab:"193-EC2AR", sqd:"LRD350",   rng:"63.0-80.0A" },
+    { max:150.0, ab:"193-EC2AS", sqd:"LRD365",   rng:"80.0-104.0A" },
+    { max:220.0, ab:"193-E300",  sqd:"LR9F71",   rng:"132-220A" },
+    { max:330.0, ab:"193-E300",  sqd:"LR9F7375", rng:"200-330A" },
+    { max:500.0, ab:"193-E300",  sqd:"LR9F7379", rng:"300-500A" }
   ];
 
   function k90Factor(c) {
@@ -182,34 +226,61 @@
     if (awg === "10 AWG") return Math.min(rawA, 30);
     return rawA;
   }
-  function tempAmps(row, mat) {
-    return mat === "AL" ? [row[4], row[5], row[6]] : [row[1], row[2], row[3]];
+  function pickOcpd(desA) {
+    for (var i = 0; i < STD_OCPD.length; i++) {
+      if (STD_OCPD[i] >= desA - 0.001) return STD_OCPD[i];
+    }
+    return STD_OCPD[STD_OCPD.length - 1];
+  }
+  function pickEgcIdx(ocpdA, mat, basePhaseIdx, finalPhaseIdx) {
+    var lastEntry = NEC_250_122[NEC_250_122.length - 1];
+    var baseAwg = mat === "AL" ? lastEntry.al : lastEntry.cu;
+    for (var i = 0; i < NEC_250_122.length; i++) {
+      if (ocpdA <= NEC_250_122[i].max) {
+        baseAwg = mat === "AL" ? NEC_250_122[i].al : NEC_250_122[i].cu;
+        break;
+      }
+    }
+    var egcIdx = WIRE_DB.findIndex(function(x){ return x.awg === baseAwg; });
+    if (egcIdx < 0) egcIdx = 0;
+    if (finalPhaseIdx > basePhaseIdx) {
+      var reqC = WIRE_DB[egcIdx].cmil * (WIRE_DB[finalPhaseIdx].cmil / WIRE_DB[basePhaseIdx].cmil);
+      for (var g = egcIdx; g < WIRE_DB.length; g++) {
+        if (WIRE_DB[g].cmil >= reqC - 0.1) { egcIdx = g; break; }
+      }
+    }
+    if (egcIdx > finalPhaseIdx) egcIdx = finalPhaseIdx;
+    return egcIdx;
   }
   function vdCalc(idx, mat, fla, sp, ft) {
     var r = WIRE_DB[idx];
-    var res = mat === "AL" ? r[9] : r[8];
+    var res = mat === "AL" ? r.rAl : r.rCu;
     if (res <= 0) return { v: 999, p: 999 };
-    var z = sp.dc ? res : Math.sqrt(res * res + r[10] * r[10]);
+    var z = sp.dc ? res : Math.sqrt(res * res + r.xL * r.xL);
     var m = sp.dc ? 2.0 : (sp.ph === 3 ? Math.sqrt(3.0) : 2.0);
     var dv = (m * fla * ft * z) / 1000.0;
     return { v: dv, p: (dv / sp.v) * 100.0 };
   }
   function condPick(kind, pIdx, pw, gIdx) {
-    var tot = (pw * WIRE_DB[pIdx][11]) + WIRE_DB[gIdx][11];
+    var tot = (pw * WIRE_DB[pIdx].area) + WIRE_DB[gIdx].area;
     var list = COND_TBLS[kind];
     for (var i = 0; i < list.length; i++) {
-      if (tot <= list[i][1] + 0.00001) return list[i][0] + " (" + ((tot / list[i][2]) * 100).toFixed(1) + "%)";
+      if (tot <= list[i].cap40 + 0.00001) {
+        return list[i].name + " (" + ((tot / list[i].tot) * 100).toFixed(1) + "%)";
+      }
     }
     var last = list[list.length - 1];
-    return last[0] + " (" + ((tot / last[2]) * 100).toFixed(1) + "%)";
+    return last.name + " (" + ((tot / last.tot) * 100).toFixed(1) + "%)";
   }
   function olPick(desA, fla) {
-    var t = Math.max(fla * 1.15, desA * 0.90);
+    var t = Math.max(fla, desA * 0.90);
     for (var i = 0; i < OL_TBL.length; i++) {
-      if (OL_TBL[i][0] >= t - 0.001) return { ab: OL_TBL[i][1] + " (" + OL_TBL[i][3] + ")", sqd: OL_TBL[i][2] + " (" + OL_TBL[i][3] + ")" };
+      if (OL_TBL[i].max >= t - 0.001) {
+        return { ab: OL_TBL[i].ab + " (" + OL_TBL[i].rng + ")", sqd: OL_TBL[i].sqd + " (" + OL_TBL[i].rng + ")" };
+      }
     }
     var l = OL_TBL[OL_TBL.length - 1];
-    return { ab: l[1] + " (" + l[3] + ")", sqd: l[2] + " (" + l[3] + ")" };
+    return { ab: l.ab + " (" + l.rng + ")", sqd: l.sqd + " (" + l.rng + ")" };
   }
   function makeTd(txt, cls, pillCls) {
     var td = document.createElement("td");
@@ -234,6 +305,7 @@
     tb.innerHTML = "";
     var totKw = 0, totDes = 0;
     var topKeys = ["3P/480VAC", "3P/240VAC", "1P/240VAC", "1P/120VAC", "250VDC"];
+    var matList = [{ val:"CU", lbl:"Cu" }, { val:"AL", lbl:"Al" }];
 
     for (var i = 0; i < ROWS.length; i++) {
       var s = ROWS[i];
@@ -243,35 +315,37 @@
       var ft = Number(s.length_ft || 0);
       var fla = sp.dc ? (kw * 1000 / sp.v) : (sp.ph === 3 ? (kw * 1000 / (Math.sqrt(3) * sp.v)) : (kw * 1000 / sp.v));
       var des = fla * (s.continuous ? 1.25 : 1.0);
+      var ocpd = pickOcpd(des);
       totKw += kw; totDes += des;
 
-      var w60 = WIRE_DB[WIRE_DB.length - 1][0], w75 = w60, w90 = w60;
+      var maxAwg = WIRE_DB[WIRE_DB.length - 1].awg;
+      var w60 = maxAwg, w75 = maxAwg, w90 = maxAwg;
       for (var j = 0; j < WIRE_DB.length; j++) {
-        var ta = tempAmps(WIRE_DB[j], mat);
-        var e60 = cap2404d(WIRE_DB[j][0], ta[0], mat === "AL");
-        var e75 = cap2404d(WIRE_DB[j][0], ta[1], mat === "AL");
-        var e90 = cap2404d(WIRE_DB[j][0], ta[2] * k90, mat === "AL");
-        if (e60 >= des && w60 === WIRE_DB[WIRE_DB.length - 1][0]) w60 = WIRE_DB[j][0];
-        if (e75 >= des && w75 === WIRE_DB[WIRE_DB.length - 1][0]) w75 = WIRE_DB[j][0];
-        if (e90 >= des && w90 === WIRE_DB[WIRE_DB.length - 1][0]) w90 = WIRE_DB[j][0];
+        var row = WIRE_DB[j];
+        var a60 = mat === "AL" ? row.al60 : row.cu60;
+        var a75 = mat === "AL" ? row.al75 : row.cu75;
+        var a90 = mat === "AL" ? row.al90 : row.cu90;
+        var e60 = cap2404d(row.awg, a60, mat === "AL");
+        var e75 = cap2404d(row.awg, a75, mat === "AL");
+        var e90 = cap2404d(row.awg, a90 * k90, mat === "AL");
+        if (e60 >= des && w60 === maxAwg) w60 = row.awg;
+        if (e75 >= des && w75 === maxAwg) w75 = row.awg;
+        if (e90 >= des && w90 === maxAwg) w90 = row.awg;
       }
-      var baseIdx = WIRE_DB.findIndex(function(x){ return x[0] === w75; });
+      var baseIdx = WIRE_DB.findIndex(function(x){ return x.awg === w75; });
       if (baseIdx < 0) baseIdx = WIRE_DB.length - 1;
       var idx = baseIdx;
       if (autoVd && ft > 0) {
         while (idx < WIRE_DB.length - 1 && vdCalc(idx, mat, fla, sp, ft).p > maxVd) idx++;
       }
-      var egcAwg = des <= 20 ? "12 AWG" : (des <= 60 ? "10 AWG" : "8 AWG");
-      var egcIdx = WIRE_DB.findIndex(function(x){ return x[0] === egcAwg; });
-      if (egcIdx < 0) egcIdx = 2;
-      if (idx > baseIdx) {
-        var reqC = WIRE_DB[egcIdx][7] * (WIRE_DB[idx][7] / WIRE_DB[baseIdx][7]);
-        for (var g = egcIdx; g < WIRE_DB.length; g++) { if (WIRE_DB[g][7] >= reqC - 0.1) { egcIdx = g; break; } }
-      }
+      var egcIdx = pickEgcIdx(ocpd, mat, baseIdx, idx);
       var vd = vdCalc(idx, mat, fla, sp, ft);
       var ol = olPick(des, fla);
-      s.fla = fla; s.design_amps = des; s.wire_60c = w60; s.wire_75c = w75; s.wire_90c = w90;
-      s.wire_awg = WIRE_DB[idx][0]; s.egc_awg = WIRE_DB[egcIdx][0]; s.vd_volts = vd.v; s.vd_pct = vd.p;
+
+      s.fla = fla; s.design_amps = des; s.ocpd_amps = ocpd;
+      s.wire_60c = w60; s.wire_75c = w75; s.wire_90c = w90;
+      s.wire_awg = WIRE_DB[idx].awg; s.egc_awg = WIRE_DB[egcIdx].awg;
+      s.vd_volts = vd.v; s.vd_pct = vd.p;
       s.emt_s = condPick("EMT", idx, sp.w, egcIdx);
       s.rmc_s = condPick("RIGID", idx, sp.w, egcIdx);
       s.pvc_s = condPick("PVC40", idx, sp.w, egcIdx);
@@ -286,8 +360,7 @@
       selTop.className = "sel";
       for (var t = 0; t < topKeys.length; t++) {
         var opt = document.createElement("option");
-        opt.value = topKeys[t];
-        opt.textContent = topKeys[t];
+        opt.value = topKeys[t]; opt.textContent = topKeys[t];
         if (s.topology === topKeys[t]) opt.selected = true;
         selTop.appendChild(opt);
       }
@@ -298,12 +371,12 @@
       var tdMat = document.createElement("td");
       var selMat = document.createElement("select");
       selMat.className = "sel";
-      [["CU", "Cu"], ["AL", "Al"]].forEach(function(pair){
+      for (var m = 0; m < matList.length; m++) {
         var o = document.createElement("option");
-        o.value = pair[0]; o.textContent = pair[1];
-        if (mat === pair[0]) o.selected = true;
+        o.value = matList[m].val; o.textContent = matList[m].lbl;
+        if (mat === matList[m].val) o.selected = true;
         selMat.appendChild(o);
-      });
+      }
       (function(rowIdx, elem){ elem.onchange = function(){ ROWS[rowIdx].material = elem.value; recalc(); }; })(i, selMat);
       tdMat.appendChild(selMat);
       tr.appendChild(tdMat);
@@ -330,8 +403,9 @@
       tr.appendChild(tdCont);
 
       tr.appendChild(makeTd(fla.toFixed(2) + "A / " + des.toFixed(2) + "A", "mono"));
+      tr.appendChild(makeTd(ocpd + "A", "mono"));
       tr.appendChild(makeTd("60C:" + w60.replace(" AWG","") + " | 75C:" + w75.replace(" AWG","") + " | 90C:" + w90.replace(" AWG",""), "mono", "pill-t"));
-      tr.appendChild(makeTd(s.wire_awg + " + " + s.egc_awg, "mono", "pill-w"));
+      tr.appendChild(makeTd(s.wire_awg + " + " + s.egc_awg + " EGC", "mono", "pill-w"));
       tr.appendChild(makeTd(vd.v.toFixed(1) + "V (" + vd.p.toFixed(2) + "%)", "mono", vd.p > maxVd ? "pill-hi" : "pill-o"));
       tr.appendChild(makeTd(s.emt_s, "mono", "pill-c"));
       tr.appendChild(makeTd(s.rmc_s, "mono", "pill-c"));
@@ -347,7 +421,7 @@
 
   document.getElementById("global-mat").onchange = function() {
     var v = this.value;
-    if (!v) return;
+    if (v === "") return;
     for (var i = 0; i < ROWS.length; i++) ROWS[i].material = v;
     recalc();
   };
@@ -361,10 +435,10 @@
     recalc();
   };
   document.getElementById("btn-csv").onclick = function() {
-    var hdr = ["Ref,Topology,Material,kW,Feet,FLA,Design_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
+    var hdr = ["Ref,Topology,Material,kW,Feet,FLA,Design_A,OCPD_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC_250_122,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
     for (var i = 0; i < ROWS.length; i++) {
       var r = ROWS[i];
-      hdr.push([r.ref,r.topology,r.material,r.kw,r.length_ft,(r.fla||0).toFixed(2),(r.design_amps||0).toFixed(2),r.wire_60c||"",r.wire_75c||"",r.wire_90c||"",r.wire_awg||"",r.egc_awg||"",(r.vd_pct||0).toFixed(2),r.emt_s||"",r.rmc_s||"",r.pvc_s||"",r.ab_s||"",r.sqd_s||""].join(","));
+      hdr.push([r.ref,r.topology,r.material,r.kw,r.length_ft,(r.fla||0).toFixed(2),(r.design_amps||0).toFixed(2),r.ocpd_amps||"",r.wire_60c||"",r.wire_75c||"",r.wire_90c||"",r.wire_awg||"",r.egc_awg||"",(r.vd_pct||0).toFixed(2),r.emt_s||"",r.rmc_s||"",r.pvc_s||"",r.ab_s||"",r.sqd_s||""].join(","));
     }
     var blob = new Blob([hdr.join("\n")], { type:"text/csv;charset=utf-8;" });
     var a = document.createElement("a");
@@ -372,6 +446,29 @@
     a.download = "nec_schedule_standalone.csv";
     a.click();
   };
+
+  // Native Android Chrome PWA Install Prompt Button
+  var deferredPrompt = null;
+  var installBtn = document.getElementById("btn-install");
+  window.addEventListener("beforeinstallprompt", function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = "inline-block";
+  });
+  installBtn.onclick = function() {
+    if (deferredPrompt === null) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function() {
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+  };
+
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1")) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js").catch(function() {});
+    });
+  }
 
   try {
     recalc();
