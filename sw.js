@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nec-schedule-pwa-v9';
+const CACHE_NAME = 'nec-schedule-pwa-v10';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -15,10 +15,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET' || event.request.url.indexOf('/api/') >= 0) {
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then((res) => {
-        if (res && res.status === 200 && event.request.method === 'GET') {
+        if (res && res.status === 200) {
           const copy = res.clone();
           caches.open(CACHE_NAME).then((c) => c.put(event.request, copy));
         }

@@ -23,6 +23,8 @@
   button.sec { background:#334155; border-color:#475569; }
   button.del { background:transparent; border:1px solid #475569; color:#94a3b8; padding:2px 7px; font-size:12px; }
   button.del:hover { border-color:#ef4444; color:#fca5a5; }
+  button.pdf { background:#0f766e; border-color:#2dd4bf; }
+  button.pdf:disabled { opacity:0.6; cursor:wait; }
   button.install { background:#059669; border-color:#34d399; display:none; }
   .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
   .bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:#0f172a; border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:12px; font-size:12px; }
@@ -69,6 +71,7 @@
   </div>
   <div class="btn-row">
     <button id="btn-install" class="install">Install App</button>
+    <button id="btn-pdf" class="pdf">Export PDF</button>
     <button id="btn-csv">Download CSV</button>
     <button id="btn-print" class="sec">Print</button>
     <button id="btn-add" class="sec">+ Add Row</button>
@@ -78,6 +81,7 @@
 
 <div class="card">
   <div class="bar">
+    <label>Project: <input id="project-title" class="desc" style="width:210px;" type="text" value="NEC Multi-Topology Electrical Design Schedule"></label>
     <label>Global Material:
       <select id="global-mat" class="sel">
         <option value="">Per-Row</option>
@@ -1184,6 +1188,100 @@
     ROWS.push({ ref:"L"+n, name:"Custom Load "+n, topology:"3P/480VAC", motor_hp:"", material:"CU", in_raceway:false, kw:10.0, length_ft:100.0, continuous:true });
     recalc();
   };
+  var PROJ_KEY = "nec_standalone_project_v10";
+  var projInput = document.getElementById("project-title");
+  try {
+    var savedProj = localStorage.getItem(PROJ_KEY);
+    if (savedProj) projInput.value = savedProj;
+  } catch (e) {}
+  projInput.onchange = function() {
+    try { localStorage.setItem(PROJ_KEY, projInput.value); } catch (e) {}
+  };
+
+  document.getElementById("btn-pdf").onclick = function() {
+    var btn = this;
+    var eb = document.getElementById("err-box");
+    eb.style.display = "none";
+
+    var isLocal = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
+    if (isLocal === false) {
+      window.print();
+      return;
+    }
+
+    var cleanRows = [];
+    for (var i = 0; i < ROWS.length; i++) {
+      var r = ROWS[i];
+      cleanRows.push({
+        ref: r.ref,
+        name: r.name,
+        topology: r.topology,
+        motor_hp: r.motor_hp || "",
+        material: r.material || "CU",
+        in_raceway: Boolean(r.in_raceway),
+        kw: Number(r.kw || 0),
+        length_ft: Number(r.length_ft || 0),
+        continuous: Boolean(r.continuous)
+      });
+    }
+
+    var payload = {
+      project: (projInput.value || "NEC Multi-Topology Electrical Design Schedule").trim(),
+      ambient_c: Number(document.getElementById("amb-c").value || 40),
+      max_vd: Number(document.getElementById("max-vd").value || 3.0),
+      auto_vd: document.getElementById("auto-vd").checked,
+      motor_ocpd_mode: document.getElementById("motor-ocpd-mode").value,
+      apply_bundle_derate: document.getElementById("apply-bundle-derate").checked,
+      feeder: {
+        topology: document.getElementById("feeder-topo").value,
+        scope: document.getElementById("feeder-scope").value,
+        material: document.getElementById("feeder-mat").value,
+        length_ft: Number(document.getElementById("feeder-ft").value || 150)
+      },
+      transformer: {
+        phases: Number(document.getElementById("xfmr-ph").value || 3),
+        value: Number(document.getElementById("xfmr-val").value || 45),
+        unit: document.getElementById("xfmr-unit").value,
+        v_pri: Number(document.getElementById("xfmr-vpri").value || 480),
+        v_sec: Number(document.getElementById("xfmr-vsec").value || 208),
+        scheme: document.getElementById("xfmr-scheme").value,
+        material: document.getElementById("xfmr-mat").value
+      },
+      rows: cleanRows
+    };
+
+    btn.disabled = true;
+    btn.textContent = "Generating PDF...";
+
+    fetch("./api/export-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function(res) {
+      if (res.ok === false) {
+        return res.text().then(function(t) { throw new Error("HTTP " + res.status + " " + t); });
+      }
+      var disp = res.headers.get("Content-Disposition") || "";
+      var match = /filename="([^"]+)"/.exec(disp);
+      var fname = match ? match.slice(1)[0] : "nec_schedule_report.pdf";
+      return res.blob().then(function(blob) { return { blob: blob, fname: fname }; });
+    }).then(function(out) {
+      var a = document.createElement("a");
+      var url = URL.createObjectURL(out.blob);
+      a.href = url;
+      a.download = out.fname;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    }).catch(function(err) {
+      eb.style.display = "block";
+      eb.textContent = "PDF export error: " + err.message;
+    }).finally(function() {
+      btn.disabled = false;
+      btn.textContent = "Export PDF";
+    });
+  };
+
   document.getElementById("btn-csv").onclick = function() {
     var hdr = ["Ref,Description,Topology,Motor_HP,Material,kW,Feet,FLA,Design_A,OCPD_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC_250_122,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
     for (var i = 0; i < ROWS.length; i++) {
