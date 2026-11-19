@@ -561,6 +561,50 @@
     }
   }
 
+  function sizeSetsForOcpd2404(ocpdA, minLoadA, mat, ambC, isMotor) {
+    var kAmb = k90Factor(ambC);
+    var minPar = WIRE_DB.findIndex(function(x){ return x.awg === "1/0 AWG"; });
+    var prevStd = 0;
+    if (ocpdA > 0 && ocpdA <= 800) {
+      for (var p = 0; p < STD_OCPD.length; p++) {
+        if (STD_OCPD[p] < ocpdA) prevStd = STD_OCPD[p];
+        else break;
+      }
+    }
+    for (var sets = 1; sets <= 8; sets++) {
+      var startI = sets === 1 ? 0 : minPar;
+      for (var w = startI; w < WIRE_DB.length; w++) {
+        var wr = WIRE_DB[w];
+        var a75 = mat === "AL" ? wr.al75 : wr.cu75;
+        var a90 = mat === "AL" ? wr.al90 : wr.cu90;
+        var e75 = cap2404d(wr.awg, a75, mat === "AL", isMotor);
+        var e90 = cap2404d(wr.awg, a90 * kAmb, mat === "AL", isMotor);
+        var totAmp = sets * Math.min(e75, e90);
+        if (totAmp < minLoadA - 0.001) continue;
+        if (ocpdA <= 15) return { sets: sets, idx: w, amp: totAmp };
+        if (ocpdA <= 800) {
+          if (totAmp > prevStd + 0.001) return { sets: sets, idx: w, amp: totAmp };
+        } else {
+          if (totAmp >= ocpdA - 0.001) return { sets: sets, idx: w, amp: totAmp };
+        }
+      }
+    }
+    var last = WIRE_DB[WIRE_DB.length - 1];
+    return { sets: 8, idx: WIRE_DB.length - 1, amp: 8 * (mat === "AL" ? last.al75 : last.cu75) };
+  }
+
+  function maxOcpdForCond2404(sets, wireIdx, mat, ambC, isMotor) {
+    var kAmb = k90Factor(ambC);
+    var wr = WIRE_DB[wireIdx];
+    var a75 = mat === "AL" ? wr.al75 : wr.cu75;
+    var a90 = mat === "AL" ? wr.al90 : wr.cu90;
+    var e75 = cap2404d(wr.awg, a75, mat === "AL", isMotor);
+    var e90 = cap2404d(wr.awg, a90 * kAmb, mat === "AL", isMotor);
+    var totAmp = sets * Math.min(e75, e90);
+    var maxOcpd = totAmp <= 800.0 ? pickUp(totAmp, STD_OCPD) : pickDown(totAmp, STD_OCPD);
+    return { maxOcpd: maxOcpd, amp: totAmp };
+  }
+
   function renderTransformer(ambC) {
     var ph = Number(document.getElementById("xfmr-ph").value || 3);
     var rawVal = Number(document.getElementById("xfmr-val").value || 0);
@@ -613,16 +657,25 @@
     var priCc = priRaw < 15.0 ? pickDown(priRaw, CLASS_CC) : 0;
     var secCc = (scheme === "pri_sec" && secRaw < 15.0) ? pickDown(secRaw, CLASS_CC) : 0;
 
-    var priSizing = sizeSetsForAmps(iPri * 1.25, mat, ambC, false);
+    // Option A: Min 125% Load Wire + capped OCPD per NEC 240.4(B)/(C)
+    var priMin = sizeSetsForAmps(iPri * 1.25, mat, ambC, false);
+    var priMinCap = maxOcpdForCond2404(priMin.sets, priMin.idx, mat, ambC, false);
+    var optAOcpd = priOcpd > 0 ? Math.min(priOcpd, priMinCap.maxOcpd) : priMinCap.maxOcpd;
+    var priEgcA = pickEgcIdx(Math.max(15, optAOcpd), mat, priMin.idx, priMin.idx, priMin.sets);
+
+    // Option B: NEC 240.4 Wire sized to match full Table 450.3(B) max primary OCPD
+    var pri2404 = sizeSetsForOcpd2404(priOcpd, iPri * 1.25, mat, ambC, false);
+    var priEgcB = pickEgcIdx(Math.max(15, priOcpd), mat, pri2404.idx, pri2404.idx, pri2404.sets);
+
+    // Secondary 125% Wire + GEC/SBJ per NEC Table 250.102(C)(1)
     var secSizing = sizeSetsForAmps(iSec * 1.25, mat, ambC, false);
-    var priEgcIdx = pickEgcIdx(Math.max(15, priOcpd), mat, priSizing.idx, priSizing.idx, priSizing.sets);
     var secGecIdx = pickGecIdx250102(secSizing.idx, mat, secSizing.sets);
 
     var priWires = ph === 3 ? 3 : 2;
     var secWires = ph === 3 ? (vSec <= 240 ? 4 : 3) : (vSec >= 200 ? 3 : 2);
-    var priArea = (priWires * WIRE_DB[priSizing.idx].area) + WIRE_DB[priEgcIdx].area;
+    var priEmtA = condPickByArea("EMT", (priWires * WIRE_DB[priMin.idx].area) + WIRE_DB[priEgcA].area);
+    var priEmtB = condPickByArea("EMT", (priWires * WIRE_DB[pri2404.idx].area) + WIRE_DB[priEgcB].area);
     var secArea = (secWires * WIRE_DB[secSizing.idx].area) + WIRE_DB[secGecIdx].area;
-    var priEmt = condPickByArea("EMT", priArea);
     var secEmt = condPickByArea("EMT", secArea);
     var secRmc = condPickByArea("RIGID", secArea);
     var secPvc = condPickByArea("PVC40", secArea);
@@ -640,11 +693,14 @@
     }
     document.getElementById("xfmr-formula").textContent = fText;
 
-    var priPfx = priSizing.sets > 1 ? (priSizing.sets + "x ") : "";
+    var pfxA = priMin.sets > 1 ? (priMin.sets + "x ") : "";
+    var pfxB = pri2404.sets > 1 ? (pri2404.sets + "x ") : "";
     var secPfx = secSizing.sets > 1 ? (secSizing.sets + "x ") : "";
-    var priWireNote = (scheme === "pri_sec" && ph === 3)
-      ? "Note: On 3P Delta-Wye, size pri wire for pri OCPD (" + priOcpd + "A) per 240.21(C)(1)"
-      : ("EMT (40%): " + priEmt.text);
+    var rule2404 = priOcpd > 800 ? "NEC 240.4(C)" : "NEC 240.4(B)";
+    var optASub = optAOcpd < priOcpd
+      ? ("Cap Pri OCPD <= " + optAOcpd + "A (" + rule2404 + ") | " + priEmtA.text)
+      : ("Protected by " + priDisp + " (" + priMinCap.amp.toFixed(1) + "A) | " + priEmtA.text);
+    var optBSub = "Protected by " + priDisp + " (" + pri2404.amp.toFixed(1) + "A @ " + rule2404 + ") | " + priEmtB.text;
 
     buildStatCards(document.getElementById("xfmr-summary"), [
       {
@@ -660,6 +716,18 @@
         cls: "pill-m"
       },
       {
+        lbl: "Primary Min 125% Wire + EGC (250.122)",
+        val: pfxA + WIRE_DB[priMin.idx].awg + " " + matLbl + " + " + WIRE_DB[priEgcA].awg + " EGC",
+        sub: optASub,
+        cls: "pill-w"
+      },
+      {
+        lbl: "Primary NEC 240.4 Wire for Max OCPD",
+        val: pfxB + WIRE_DB[pri2404.idx].awg + " " + matLbl + " + " + WIRE_DB[priEgcB].awg + " EGC",
+        sub: optBSub,
+        cls: "pill-m"
+      },
+      {
         lbl: "Secondary FLA (" + vSec + " V, " + ph + "P)",
         val: iSec.toFixed(2) + " A",
         sub: "125% Cont: " + (iSec * 1.25).toFixed(2) + " A | " + secWires + " wires/set",
@@ -672,15 +740,15 @@
         cls: scheme === "pri_only" ? "pill-t" : "pill-o"
       },
       {
-        lbl: "Primary 125% Wire + EGC (250.122)",
-        val: priPfx + WIRE_DB[priSizing.idx].awg + " " + matLbl + " + " + WIRE_DB[priEgcIdx].awg + " EGC",
-        sub: priWireNote,
+        lbl: "Secondary 125% Wire + GEC/SBJ (250.102(C)(1))",
+        val: secPfx + WIRE_DB[secSizing.idx].awg + " " + matLbl + " + " + WIRE_DB[secGecIdx].awg + " GEC",
+        sub: "Secondary 75C/90C ampacity sized for 125% FLA",
         cls: "pill-w"
       },
       {
-        lbl: "Secondary 125% Wire + GEC/SBJ (250.102(C)(1))",
-        val: secPfx + WIRE_DB[secSizing.idx].awg + " " + matLbl + " + " + WIRE_DB[secGecIdx].awg + " GEC",
-        sub: "EMT: " + secEmt.text + " | RMC: " + secRmc.text + " | PVC: " + secPvc.text,
+        lbl: "Secondary Conduit Fill (" + (secSizing.sets > 1 ? "Per Parallel Raceway" : "40% Max") + ")",
+        val: secEmt.text,
+        sub: "RMC: " + secRmc.text + " | PVC: " + secPvc.text,
         cls: secEmt.over ? "pill-hi" : "pill-c"
       }
     ]);
