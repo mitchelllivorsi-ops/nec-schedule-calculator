@@ -57,6 +57,9 @@
   .tab-btn.active { background:#0284c7; border-color:#38bdf8; color:#fff; }
   .card.tab-hidden { display:none; }
   .formula-strip.emerald { border-left-color:#10b981; }
+  .formula-strip.purple { border-left-color:#a855f7; }
+  .bend-ref { margin-top:10px; padding:8px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; font-size:11px; color:#94a3b8; line-height:1.6; }
+  .bend-ref b { color:#e2e8f0; }
   @media (max-width: 768px) {
     body { padding:12px 10px; }
     h1 { font-size:16px; }
@@ -97,6 +100,7 @@
   <button class="tab-btn" data-tab="feeder">Main Feeder</button>
   <button class="tab-btn" data-tab="transformer">Transformer &amp; SCA</button>
   <button class="tab-btn" data-tab="raceway">Shared Raceway</button>
+  <button class="tab-btn" data-tab="bending">Conduit Bending</button>
 </div>
 
 <div class="card" id="card-quick" data-section="quick">
@@ -332,6 +336,71 @@
     </div>
   </div>
   <div id="raceway-summary" class="grid-boxes"></div>
+</div>
+
+<div class="card" id="card-bending" data-section="bending">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h2>Conduit Bending Quick Calculator (90&deg; Stub-Up, Offset &amp; 3-Point Saddle)</h2>
+      <div class="sub">1/2&quot; through 2&quot; EMT &amp; Rigid (RMC) | Tape-measure 1/16&quot; fractions | Standard bender deducts + custom shoe override | NEC 358.26 / 344.26 (360&deg; max)</div>
+    </div>
+  </div>
+  <div class="bar" style="margin-top:10px;margin-bottom:8px;">
+    <span style="color:#7dd3fc;font-weight:600;">90&deg; Stub-Up:</span>
+    <label>Type:
+      <select id="cb-type" class="sel">
+        <option value="EMT">EMT</option>
+        <option value="RIGID">Rigid (RMC)</option>
+      </select>
+    </label>
+    <label>Size:
+      <select id="cb-size" class="sel">
+        <option value='1/2"'>1/2&quot;</option>
+        <option value='3/4"'>3/4&quot;</option>
+        <option value='1"'>1&quot;</option>
+        <option value='1-1/4"'>1-1/4&quot;</option>
+        <option value='1-1/2"'>1-1/2&quot;</option>
+        <option value='2"'>2&quot;</option>
+      </select>
+    </label>
+    <label>Stub Height (in): <input id="cb-stub" class="in" type="number" step="0.25" min="0" value="18"></label>
+    <label title="Leave blank or 0 to use standard deduct for selected size &amp; type">Shoe Deduct Ovr (in): <input id="cb-deduct-ovr" class="in" style="width:62px;" type="number" step="0.25" min="0" placeholder="Auto"></label>
+  </div>
+  <div class="bar" style="margin-bottom:8px;">
+    <span style="color:#6ee7b7;font-weight:600;">2-Bend Offset:</span>
+    <label>Offset Rise (in): <input id="cb-off-rise" class="in" type="number" step="0.25" min="0" value="6"></label>
+    <label>Angle:
+      <select id="cb-off-ang" class="sel">
+        <option value="10">10&deg; (5.76x, 1/16&quot;/in)</option>
+        <option value="15">15&deg; (3.86x, 1/8&quot;/in)</option>
+        <option value="22.5">22.5&deg; (2.61x, 3/16&quot;/in)</option>
+        <option value="30" selected>30&deg; (2.00x, 1/4&quot;/in)</option>
+        <option value="45">45&deg; (1.41x, 3/8&quot;/in)</option>
+        <option value="60">60&deg; (1.15x, 1/2&quot;/in)</option>
+      </select>
+    </label>
+    <label title="Distance from conduit end to start of obstruction">Dist to Obstruction (in): <input id="cb-off-dist" class="in" type="number" step="0.5" min="0" value="24"></label>
+  </div>
+  <div class="bar" style="margin-bottom:0;">
+    <span style="color:#d8b4fe;font-weight:600;">3-Point Saddle:</span>
+    <label>Obstacle Height (in): <input id="cb-sad-rise" class="in" type="number" step="0.25" min="0" value="4"></label>
+    <label>Angles:
+      <select id="cb-sad-mode" class="sel">
+        <option value="45_22.5" selected>45&deg; Ctr / 22.5&deg; Outers (2.5x, 3/16&quot;/in)</option>
+        <option value="60_30">60&deg; Ctr / 30&deg; Outers (2.0x, 1/4&quot;/in)</option>
+      </select>
+    </label>
+    <label title="Distance from conduit end to center of obstruction">Dist to Center (in): <input id="cb-sad-dist" class="in" type="number" step="0.5" min="0" value="36"></label>
+  </div>
+  <div id="cb-formula" class="formula-strip purple mono"></div>
+  <div id="cb-summary" class="grid-boxes"></div>
+  <div class="bend-ref mono">
+    <b>Standard 90&deg; Deduct Reference:</b>
+    EMT: 1/2&quot;=5&quot; | 3/4&quot;=6&quot; | 1&quot;=8&quot; | 1-1/4&quot;=11&quot; | 1-1/2&quot;=12&quot;* | 2&quot;=15&quot;*
+    &nbsp;&bull;&nbsp;
+    Rigid (RMC): 1/2&quot;=6&quot; | 3/4&quot;=8&quot; | 1&quot;=11&quot; | 1-1/4&quot;=12&quot;* | 1-1/2&quot;=14&quot;* | 2&quot;=16&quot;*
+    &nbsp;(*Verify cast deduct on your 1-1/4&quot;-2&quot; mechanical/electric bender shoe.)
+  </div>
 </div>
 
 <script id="init-data" type="application/json">[{"ref": "L1", "name": "3P/480V 10 HP Blower Motor", "topology": "3P/480VAC", "material": "CU", "motor_hp": "10", "is_motor": true, "in_raceway": true, "kw": 7.46, "pf": 0.85, "length_ft": 125.0, "continuous": true, "fla": 14.0, "design_amps": 17.5, "ocpd_amps": 35, "wire_60c": "12 AWG", "wire_75c": "14 AWG", "wire_90c": "14 AWG", "wire_awg": "14 AWG", "egc_awg": "14 AWG", "upsized_for_vd": false, "vd_volts": 8.08, "vd_pct": 1.68, "emt_trade": "1/2\" EMT", "emt_fill_pct": 12.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 12.4, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 13.6, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L2", "name": "3P/480V 25 HP Process Pump", "topology": "3P/480VAC", "material": "CU", "motor_hp": "25", "is_motor": true, "in_raceway": true, "kw": 18.65, "pf": 0.85, "length_ft": 120.0, "continuous": true, "fla": 34.0, "design_amps": 42.5, "ocpd_amps": 90, "wire_60c": "6 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "8 AWG", "upsized_for_vd": false, "vd_volts": 4.88, "vd_pct": 1.02, "emt_trade": "3/4\" EMT", "emt_fill_pct": 27.5, "rmc_trade": "3/4\" RMC", "rmc_fill_pct": 26.7, "pvc_trade": "3/4\" PVC40", "pvc_fill_pct": 28.8, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}, {"ref": "L3", "name": "3P/480V 10 kW Duct Heater", "topology": "3P/480VAC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 10.0, "pf": 1.0, "length_ft": 100.0, "continuous": true, "fla": 12.03, "design_amps": 15.04, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "12 AWG", "egc_awg": "12 AWG", "upsized_for_vd": false, "vd_volts": 4.17, "vd_pct": 0.87, "emt_trade": "1/2\" EMT", "emt_fill_pct": 17.5, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 16.9, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 18.7, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L4", "name": "1P/120V Control / Aux Load", "topology": "1P/120VAC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 1.8, "pf": 1.0, "length_ft": 80.0, "continuous": true, "fla": 15.0, "design_amps": 18.75, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "10 AWG", "egc_awg": "10 AWG", "upsized_for_vd": true, "vd_volts": 2.88, "vd_pct": 2.4, "emt_trade": "1/2\" EMT", "emt_fill_pct": 20.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 20.2, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 22.2, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L5", "name": "250VDC Bus / Motor Load", "topology": "250VDC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 8.0, "pf": 1.0, "length_ft": 110.0, "continuous": true, "fla": 32.0, "design_amps": 40.0, "ocpd_amps": 40, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 5.49, "vd_pct": 2.2, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}]</script>
@@ -1111,6 +1180,178 @@
     saveQuickLookupLocal();
   }
 
+  var BEND_KEY = "nec_conduit_bending_v16";
+
+  var BEND_DB = {
+    EMT: {
+      '1/2"':   { deduct:5.0,  minR:4.0,  shoeR:5.1875, note:"Standard hand bender" },
+      '3/4"':   { deduct:6.0,  minR:4.5,  shoeR:6.125,  note:"Standard hand bender" },
+      '1"':     { deduct:8.0,  minR:5.75, shoeR:8.0,    note:"Standard hand bender" },
+      '1-1/4"': { deduct:11.0, minR:7.25, shoeR:9.5,    note:"Hand / mech bender" },
+      '1-1/2"': { deduct:12.0, minR:8.25, shoeR:10.5,   note:"Mech/elec - verify shoe" },
+      '2"':     { deduct:15.0, minR:9.5,  shoeR:12.0,   note:"Mech/elec - verify shoe" }
+    },
+    RIGID: {
+      '1/2"':   { deduct:6.0,  minR:4.0,  shoeR:6.125,  note:"Hand (3/4 in EMT shoe)" },
+      '3/4"':   { deduct:8.0,  minR:4.5,  shoeR:8.0,    note:"Hand (1 in EMT shoe)" },
+      '1"':     { deduct:11.0, minR:5.75, shoeR:9.5,    note:"Hand/mech (1-1/4 in shoe)" },
+      '1-1/4"': { deduct:12.0, minR:7.25, shoeR:10.5,   note:"Mech/555/hyd - verify shoe" },
+      '1-1/2"': { deduct:14.0, minR:8.25, shoeR:11.5,   note:"Mech/555/hyd - verify shoe" },
+      '2"':     { deduct:16.0, minR:9.5,  shoeR:13.0,   note:"Mech/555/hyd - verify shoe" }
+    }
+  };
+
+  var OFF_ANG_DB = {
+    "10":   { deg:10.0, mult:5.759, shrinkIn:0.0625, shrinkLbl:'1/16"' },
+    "15":   { deg:15.0, mult:3.864, shrinkIn:0.1250, shrinkLbl:'1/8"'  },
+    "22.5": { deg:22.5, mult:2.613, shrinkIn:0.1875, shrinkLbl:'3/16"' },
+    "30":   { deg:30.0, mult:2.000, shrinkIn:0.2500, shrinkLbl:'1/4"'  },
+    "45":   { deg:45.0, mult:1.414, shrinkIn:0.3750, shrinkLbl:'3/8"'  },
+    "60":   { deg:60.0, mult:1.155, shrinkIn:0.5000, shrinkLbl:'1/2"'  }
+  };
+
+  var SAD_DB = {
+    "45_22.5": { ctr:45.0, out:22.5, mult:2.5, shrinkIn:0.1875, shrinkLbl:'3/16"', totDeg:90 },
+    "60_30":   { ctr:60.0, out:30.0, mult:2.0, shrinkIn:0.2500, shrinkLbl:'1/4"',  totDeg:120 }
+  };
+
+  function gcdInt(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b !== 0) { var t = b; b = a % b; a = t; }
+    return a || 1;
+  }
+
+  function toFrac16(val) {
+    var sign = val < 0 ? "-" : "";
+    var av = Math.abs(val);
+    var sixteenths = Math.round(av * 16.0);
+    var whole = Math.floor(sixteenths / 16);
+    var rem = sixteenths % 16;
+    if (rem === 0) return sign + whole + '"';
+    var g = gcdInt(rem, 16);
+    var num = rem / g;
+    var den = 16 / g;
+    if (whole === 0) return sign + num + "/" + den + '"';
+    return sign + whole + "-" + num + "/" + den + '"';
+  }
+
+  function saveBendingLocal() {
+    try {
+      localStorage.setItem(BEND_KEY, JSON.stringify({
+        type: document.getElementById("cb-type").value,
+        size: document.getElementById("cb-size").value,
+        stub: document.getElementById("cb-stub").value,
+        deductOvr: document.getElementById("cb-deduct-ovr").value,
+        offRise: document.getElementById("cb-off-rise").value,
+        offAng: document.getElementById("cb-off-ang").value,
+        offDist: document.getElementById("cb-off-dist").value,
+        sadRise: document.getElementById("cb-sad-rise").value,
+        sadMode: document.getElementById("cb-sad-mode").value,
+        sadDist: document.getElementById("cb-sad-dist").value
+      }));
+    } catch (e) {}
+  }
+
+  function loadBendingLocal() {
+    try {
+      var raw = localStorage.getItem(BEND_KEY);
+      if (raw) {
+        var b = JSON.parse(raw);
+        if (b.type === "EMT" || b.type === "RIGID") document.getElementById("cb-type").value = b.type;
+        if (b.size && BEND_DB.EMT[b.size]) document.getElementById("cb-size").value = b.size;
+        if (b.stub !== undefined) document.getElementById("cb-stub").value = String(b.stub);
+        if (b.deductOvr !== undefined) document.getElementById("cb-deduct-ovr").value = String(b.deductOvr);
+        if (b.offRise !== undefined) document.getElementById("cb-off-rise").value = String(b.offRise);
+        if (b.offAng && OFF_ANG_DB[b.offAng]) document.getElementById("cb-off-ang").value = b.offAng;
+        if (b.offDist !== undefined) document.getElementById("cb-off-dist").value = String(b.offDist);
+        if (b.sadRise !== undefined) document.getElementById("cb-sad-rise").value = String(b.sadRise);
+        if (b.sadMode && SAD_DB[b.sadMode]) document.getElementById("cb-sad-mode").value = b.sadMode;
+        if (b.sadDist !== undefined) document.getElementById("cb-sad-dist").value = String(b.sadDist);
+      }
+    } catch (e) {}
+  }
+
+  function renderConduitBending() {
+    var ctype = document.getElementById("cb-type").value === "RIGID" ? "RIGID" : "EMT";
+    var sz = document.getElementById("cb-size").value;
+    var spec = (BEND_DB[ctype] && BEND_DB[ctype][sz]) ? BEND_DB[ctype][sz] : BEND_DB.EMT['1/2"'];
+    var stubIn = Math.max(0, Number(document.getElementById("cb-stub").value || 0));
+    var deductOvr = Number(document.getElementById("cb-deduct-ovr").value || 0);
+    var deduct = deductOvr > 0 ? deductOvr : spec.deduct;
+    var stubMark = stubIn - deduct;
+    var stubTooShort = stubMark < 0;
+    var approxGain = (2.0 - (Math.PI / 2.0)) * spec.shoeR;
+
+    var offRise = Math.max(0, Number(document.getElementById("cb-off-rise").value || 0));
+    var offKey = document.getElementById("cb-off-ang").value;
+    var offSp = OFF_ANG_DB[offKey] || OFF_ANG_DB["30"];
+    var offDist = Math.max(0, Number(document.getElementById("cb-off-dist").value || 0));
+    var offSpacing = offRise * offSp.mult;
+    var offShrink = offRise * offSp.shrinkIn;
+    var offM1 = offDist + offShrink;
+    var offM2 = offM1 + offSpacing;
+    var offExactShrink = offRise * Math.tan((offSp.deg * Math.PI / 180.0) / 2.0);
+
+    var sadRise = Math.max(0, Number(document.getElementById("cb-sad-rise").value || 0));
+    var sadKey = document.getElementById("cb-sad-mode").value;
+    var sadSp = SAD_DB[sadKey] || SAD_DB["45_22.5"];
+    var sadDist = Math.max(0, Number(document.getElementById("cb-sad-dist").value || 0));
+    var sadSpacing = sadRise * sadSp.mult;
+    var sadShift = sadRise * sadSp.shrinkIn;
+    var sadTotalLoss = 2.0 * sadShift;
+    var sadCtr = sadDist + sadShift;
+    var sadOut1 = sadCtr - sadSpacing;
+    var sadOut2 = sadCtr + sadSpacing;
+    var sadNeg = sadOut1 < 0;
+
+    var typeLbl = ctype === "RIGID" ? "Rigid RMC" : "EMT";
+    document.getElementById("cb-formula").textContent =
+      "90 STUB [" + sz + " " + typeLbl + "]: Mark @ " + toFrac16(stubMark) + " (" + stubIn + '" - ' + deduct + '" deduct)  |  ' +
+      "OFFSET [" + offRise + '" @ ' + offSp.deg + " deg]: Space " + toFrac16(offSpacing) + " | Shrink " + toFrac16(offShrink) + " (Marks: " + toFrac16(offM1) + " & " + toFrac16(offM2) + ")  |  " +
+      "3-PT SADDLE [" + sadRise + '" @ ' + sadSp.ctr + "/" + sadSp.out + " deg]: " + toFrac16(sadOut1) + " | " + toFrac16(sadCtr) + " (Ctr) | " + toFrac16(sadOut2);
+
+    buildStatCards(document.getElementById("cb-summary"), [
+      {
+        lbl: '90 deg Stub-Up Arrow Mark (' + sz + ' ' + typeLbl + ')',
+        val: stubTooShort ? ("STUB < DEDUCT (" + toFrac16(stubMark) + ")") : (toFrac16(stubMark) + '  (' + stubMark.toFixed(2) + '")'),
+        sub: 'Deduct: ' + toFrac16(deduct) + (deductOvr > 0 ? ' (Custom)' : (' | ' + spec.note)) + ' | Min Stub: ' + toFrac16(deduct),
+        cls: stubTooShort ? "pill-hi" : "pill-w"
+      },
+      {
+        lbl: '90 deg Min Radius, Gain & NEC 360 deg Budget',
+        val: 'Approx Gain: ' + toFrac16(approxGain) + '  (' + approxGain.toFixed(2) + '")',
+        sub: 'NEC Ch.9 Tbl 2 Min R: ' + toFrac16(spec.minR) + ' | 90 deg bend = 25% of 360 deg max',
+        cls: "pill-t"
+      },
+      {
+        lbl: 'Offset Distance Between Marks (' + offSp.deg + ' deg)',
+        val: toFrac16(offSpacing) + '  (' + offSpacing.toFixed(2) + '")',
+        sub: 'Rise ' + toFrac16(offRise) + ' x ' + offSp.mult.toFixed(2) + ' (csc) | Uses ' + (offSp.deg * 2) + ' deg of 360 deg max',
+        cls: "pill-o"
+      },
+      {
+        lbl: 'Offset Shrinkage & Conduit Marks (From End)',
+        val: 'M1: ' + toFrac16(offM1) + '  |  M2: ' + toFrac16(offM2),
+        sub: 'Shrink: ' + toFrac16(offShrink) + ' (' + offSp.shrinkLbl + '/in; exact ' + offExactShrink.toFixed(2) + '") added to ' + toFrac16(offDist),
+        cls: "pill-o"
+      },
+      {
+        lbl: '3-Point Saddle Spacing & Shrink (' + sadSp.ctr + '/' + sadSp.out + ' deg)',
+        val: 'Ctr->Outer: ' + toFrac16(sadSpacing) + ' each',
+        sub: 'Ctr Shift: +' + toFrac16(sadShift) + ' (' + sadSp.shrinkLbl + '/in) | Total Pipe Loss: ' + toFrac16(sadTotalLoss) + ' | ' + sadSp.totDeg + ' deg',
+        cls: "pill-c"
+      },
+      {
+        lbl: '3-Point Saddle Marks From End (Notch / Arrows)',
+        val: toFrac16(sadOut1) + '  |  ' + toFrac16(sadCtr) + ' (Ctr)  |  ' + toFrac16(sadOut2),
+        sub: sadNeg ? 'Outer Mark 1 is negative - increase distance to obstacle center' : ('Bend ' + sadSp.ctr + ' deg at Ctr (notch), then ' + sadSp.out + ' deg at Outers (arrow)'),
+        cls: sadNeg ? "pill-hi" : "pill-c"
+      }
+    ]);
+
+    saveBendingLocal();
+  }
+
   function renderFeederSummary(ambC, maxVd, autoVd) {
     var fTopo = document.getElementById("feeder-topo").value;
     var fScope = document.getElementById("feeder-scope").value;
@@ -1492,6 +1733,7 @@
       "Rows: " + ROWS.length + " | Total kW: " + totKw.toFixed(1) + " | Sum Design: " + totDes.toFixed(1) + "A";
 
     renderQuickLookup(amb);
+    renderConduitBending();
     renderFeederSummary(amb, maxVd, autoVd);
     renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
@@ -1886,6 +2128,16 @@
   };
 
   loadQuickLookupLocal();
+
+  ["cb-type","cb-size","cb-stub","cb-deduct-ovr","cb-off-rise","cb-off-ang","cb-off-dist","cb-sad-rise","cb-sad-mode","cb-sad-dist"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) {
+      el.onchange = renderConduitBending;
+      el.oninput = renderConduitBending;
+    }
+  });
+  loadBendingLocal();
+
 
 
   document.getElementById("btn-csv").onclick = function() {

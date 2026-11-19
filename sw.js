@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nec-schedule-pwa-v15';
+const CACHE_NAME = 'nec-schedule-pwa-v16';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
