@@ -58,6 +58,7 @@
   .card.tab-hidden { display:none; }
   .formula-strip.emerald { border-left-color:#10b981; }
   .formula-strip.purple { border-left-color:#a855f7; }
+  .formula-strip.cyan { border-left-color:#06b6d4; }
   .bend-ref { margin-top:10px; padding:8px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; font-size:11px; color:#94a3b8; line-height:1.6; }
   .bend-ref b { color:#e2e8f0; }
   @media (max-width: 768px) {
@@ -101,6 +102,7 @@
   <button class="tab-btn" data-tab="transformer">Transformer &amp; SCA</button>
   <button class="tab-btn" data-tab="raceway">Shared Raceway</button>
   <button class="tab-btn" data-tab="bending">Conduit Bending</button>
+  <button class="tab-btn" data-tab="boxfill">Box Fill (314.16)</button>
 </div>
 
 <div class="card" id="card-quick" data-section="quick">
@@ -431,6 +433,95 @@
     &nbsp;&bull;&nbsp;
     Rigid (RMC): 1/2&quot;=6&quot; | 3/4&quot;=8&quot; | 1&quot;=11&quot; | 1-1/4&quot;=12&quot;* | 1-1/2&quot;=14&quot;* | 2&quot;=16&quot;*
     &nbsp;(*Verify cast deduct on your 1-1/4&quot;-2&quot; mechanical/electric bender shoe.)
+  </div>
+</div>
+
+<div class="card" id="card-boxfill" data-section="boxfill">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h2>NEC 314.16 Box Fill Calculator (14&ndash;6 AWG Conductors, Clamps, Devices &amp; EGCs)</h2>
+      <div class="sub">Table 314.16(A) standard metal boxes &amp; Table 314.16(B) volumes | Includes 2020/2023 NEC 314.16(B)(5) EGC rule (1&ndash;4 = 1x, +0.25x each extra)</div>
+    </div>
+    <div class="btn-row">
+      <button id="btn-bf-clear" class="sec">Zero Counts</button>
+    </div>
+  </div>
+  <div class="bar" style="margin-top:10px;margin-bottom:8px;">
+    <span style="color:#67e8f9;font-weight:600;">Conductors (314.16(B)(1)):</span>
+    <label>14 AWG (2.00): <input id="bf-14" class="in" style="width:52px;" type="number" step="1" min="0" value="2"></label>
+    <label>12 AWG (2.25): <input id="bf-12" class="in" style="width:52px;" type="number" step="1" min="0" value="4"></label>
+    <label>10 AWG (2.50): <input id="bf-10" class="in" style="width:52px;" type="number" step="1" min="0" value="0"></label>
+    <label>8 AWG (3.00): <input id="bf-8" class="in" style="width:52px;" type="number" step="1" min="0" value="0"></label>
+    <label>6 AWG (5.00): <input id="bf-6" class="in" style="width:52px;" type="number" step="1" min="0" value="0"></label>
+  </div>
+  <div class="bar" style="margin-bottom:8px;">
+    <span style="color:#fcd34d;font-weight:600;">Allowances (314.16(B)(2)&ndash;(5)):</span>
+    <label title="1x largest conductor in box if 1 or more internal cable clamps are present"><input id="bf-clamps" type="checkbox" checked> Internal Clamps (1x)</label>
+    <label title="Fixture studs or hickeys inside box (1x largest conductor per fitting type)">Studs/Hickeys: <input id="bf-fittings" class="in" style="width:48px;" type="number" step="1" min="0" value="0"></label>
+    <label title="Each device yoke/strap counts as 2x largest conductor connected to it">Device Yokes (2x): <input id="bf-devices" class="in" style="width:48px;" type="number" step="1" min="0" value="1"></label>
+    <label>Dev Wire:
+      <select id="bf-dev-awg" class="sel">
+        <option value="">Auto (Largest)</option>
+        <option value="14 AWG">14 AWG</option><option value="12 AWG">12 AWG</option>
+        <option value="10 AWG">10 AWG</option><option value="8 AWG">8 AWG</option><option value="6 AWG">6 AWG</option>
+      </select>
+    </label>
+    <label title="1-4 EGCs = 1x largest EGC; each EGC over 4 adds +0.25x (2020/2023 NEC)">EGCs: <input id="bf-egcs" class="in" style="width:48px;" type="number" step="1" min="0" value="2"></label>
+    <label>Largest EGC:
+      <select id="bf-egc-awg" class="sel">
+        <option value="">Auto (Largest)</option>
+        <option value="14 AWG">14 AWG</option><option value="12 AWG">12 AWG</option>
+        <option value="10 AWG">10 AWG</option><option value="8 AWG">8 AWG</option><option value="6 AWG">6 AWG</option>
+      </select>
+    </label>
+  </div>
+  <div class="bar" style="margin-bottom:0;">
+    <span style="color:#6ee7b7;font-weight:600;">Box Selection (Table 314.16(A)):</span>
+    <label>Box:
+      <select id="bf-box" class="sel">
+        <optgroup label="4 in Square (4S)">
+          <option value="4s_125">4&quot; x 1-1/4&quot; Square (18.0 in&sup3;)</option>
+          <option value="4s_150">4&quot; x 1-1/2&quot; Square (21.0 in&sup3;)</option>
+          <option value="4s_2125" selected>4&quot; x 2-1/8&quot; Square Deep (30.3 in&sup3;)</option>
+        </optgroup>
+        <optgroup label="4-11/16 in Square (5S)">
+          <option value="411_125">4-11/16&quot; x 1-1/4&quot; Square (25.5 in&sup3;)</option>
+          <option value="411_150">4-11/16&quot; x 1-1/2&quot; Square (29.5 in&sup3;)</option>
+          <option value="411_2125">4-11/16&quot; x 2-1/8&quot; Deep (42.0 in&sup3;)</option>
+        </optgroup>
+        <optgroup label="Handy / Utility (4 in x 2-1/8 in)">
+          <option value="hdy_150">4&quot; x 2-1/8&quot; x 1-1/2&quot; Handy (10.3 in&sup3;)</option>
+          <option value="hdy_1875">4&quot; x 2-1/8&quot; x 1-7/8&quot; Handy (13.0 in&sup3;)</option>
+          <option value="hdy_2125">4&quot; x 2-1/8&quot; x 2-1/8&quot; Handy (14.5 in&sup3;)</option>
+        </optgroup>
+        <optgroup label="Gangable / Device (3 in x 2 in)">
+          <option value="gng_200">3&quot; x 2&quot; x 2&quot; Gangable (10.0 in&sup3;)</option>
+          <option value="gng_225">3&quot; x 2&quot; x 2-1/4&quot; Gangable (10.5 in&sup3;)</option>
+          <option value="gng_250">3&quot; x 2&quot; x 2-1/2&quot; Gangable (12.5 in&sup3;)</option>
+          <option value="gng_275">3&quot; x 2&quot; x 2-3/4&quot; Gangable (14.0 in&sup3;)</option>
+          <option value="gng_350">3&quot; x 2&quot; x 3-1/2&quot; Deep Gangable (18.0 in&sup3;)</option>
+        </optgroup>
+        <optgroup label="4 in Octagonal / Round">
+          <option value="oct_150">4&quot; x 1-1/2&quot; Octagonal (15.5 in&sup3;)</option>
+          <option value="oct_2125">4&quot; x 2-1/8&quot; Octagonal Deep (21.5 in&sup3;)</option>
+        </optgroup>
+      </select>
+    </label>
+    <label title="Applies to 3 in x 2 in Gangable boxes">Gangs:
+      <select id="bf-gangs" class="sel">
+        <option value="1">1-Gang</option><option value="2">2-Gang</option>
+        <option value="3">3-Gang</option><option value="4">4-Gang</option>
+      </select>
+    </label>
+    <label title="Add volume stamped on raised cover, mud ring, or extension ring">+ Ring/Ext (in&sup3;): <input id="bf-ring" class="in" style="width:58px;" type="number" step="0.5" min="0" value="0"></label>
+    <label title="Override box volume with custom/nonmetallic stamped cu. in.">Custom Box (in&sup3;): <input id="bf-custom" class="in" style="width:62px;" type="number" step="0.5" min="0" placeholder="Auto"></label>
+  </div>
+  <div id="bf-formula" class="formula-strip cyan mono"></div>
+  <div id="bf-summary" class="grid-boxes"></div>
+  <div class="bend-ref mono">
+    <b>NEC 314.16 Quick Rules:</b>
+    Pigtails inside box = 0 | Unbroken pass-through (&lt;12&quot; loop) = 1 | External connectors/locknuts = 0 |
+    Conductors <b>4 AWG &amp; larger</b> must be sized as pull/junction boxes per <b>NEC 314.28</b> (6x/8x trade size).
   </div>
 </div>
 
@@ -1456,6 +1547,201 @@
     saveBendingLocal();
   }
 
+  var BF_KEY = "nec_box_fill_v18";
+
+  var BF_VOL = { "14 AWG":2.00, "12 AWG":2.25, "10 AWG":2.50, "8 AWG":3.00, "6 AWG":5.00 };
+  var BF_AWG_LIST = ["14 AWG", "12 AWG", "10 AWG", "8 AWG", "6 AWG"];
+
+  var BF_BOXES = [
+    { id:"4s_125",   lbl:'4" x 1-1/4" Square',         grp:"4-Square",  vol:18.0, gangable:false },
+    { id:"4s_150",   lbl:'4" x 1-1/2" Square',         grp:"4-Square",  vol:21.0, gangable:false },
+    { id:"4s_2125",  lbl:'4" x 2-1/8" Square Deep',    grp:"4-Square",  vol:30.3, gangable:false },
+    { id:"411_125",  lbl:'4-11/16" x 1-1/4" Square',   grp:"4-11/16",   vol:25.5, gangable:false },
+    { id:"411_150",  lbl:'4-11/16" x 1-1/2" Square',   grp:"4-11/16",   vol:29.5, gangable:false },
+    { id:"411_2125", lbl:'4-11/16" x 2-1/8" Deep',     grp:"4-11/16",   vol:42.0, gangable:false },
+    { id:"hdy_150",  lbl:'4" x 2-1/8" x 1-1/2" Handy', grp:"Handy",     vol:10.3, gangable:false },
+    { id:"hdy_1875", lbl:'4" x 2-1/8" x 1-7/8" Handy', grp:"Handy",     vol:13.0, gangable:false },
+    { id:"hdy_2125", lbl:'4" x 2-1/8" x 2-1/8" Handy', grp:"Handy",     vol:14.5, gangable:false },
+    { id:"gng_200",  lbl:'3" x 2" x 2" Gangable',      grp:"Gangable",  vol:10.0, gangable:true  },
+    { id:"gng_225",  lbl:'3" x 2" x 2-1/4" Gangable',  grp:"Gangable",  vol:10.5, gangable:true  },
+    { id:"gng_250",  lbl:'3" x 2" x 2-1/2" Gangable',  grp:"Gangable",  vol:12.5, gangable:true  },
+    { id:"gng_275",  lbl:'3" x 2" x 2-3/4" Gangable',  grp:"Gangable",  vol:14.0, gangable:true  },
+    { id:"gng_350",  lbl:'3" x 2" x 3-1/2" Gangable',  grp:"Gangable",  vol:18.0, gangable:true  },
+    { id:"oct_150",  lbl:'4" x 1-1/2" Octagonal',      grp:"Octagonal", vol:15.5, gangable:false },
+    { id:"oct_2125", lbl:'4" x 2-1/8" Octagonal Deep', grp:"Octagonal", vol:21.5, gangable:false }
+  ];
+
+  function saveBoxFillLocal() {
+    try {
+      localStorage.setItem(BF_KEY, JSON.stringify({
+        c14: document.getElementById("bf-14").value,
+        c12: document.getElementById("bf-12").value,
+        c10: document.getElementById("bf-10").value,
+        c8:  document.getElementById("bf-8").value,
+        c6:  document.getElementById("bf-6").value,
+        clamps: document.getElementById("bf-clamps").checked,
+        fittings: document.getElementById("bf-fittings").value,
+        devices: document.getElementById("bf-devices").value,
+        devAwg: document.getElementById("bf-dev-awg").value,
+        egcs: document.getElementById("bf-egcs").value,
+        egcAwg: document.getElementById("bf-egc-awg").value,
+        box: document.getElementById("bf-box").value,
+        gangs: document.getElementById("bf-gangs").value,
+        ring: document.getElementById("bf-ring").value,
+        custom: document.getElementById("bf-custom").value
+      }));
+    } catch (e) {}
+  }
+
+  function loadBoxFillLocal() {
+    try {
+      var raw = localStorage.getItem(BF_KEY);
+      if (raw) {
+        var b = JSON.parse(raw);
+        if (b.c14 !== undefined) document.getElementById("bf-14").value = String(b.c14);
+        if (b.c12 !== undefined) document.getElementById("bf-12").value = String(b.c12);
+        if (b.c10 !== undefined) document.getElementById("bf-10").value = String(b.c10);
+        if (b.c8 !== undefined) document.getElementById("bf-8").value = String(b.c8);
+        if (b.c6 !== undefined) document.getElementById("bf-6").value = String(b.c6);
+        if (b.clamps !== undefined) document.getElementById("bf-clamps").checked = Boolean(b.clamps);
+        if (b.fittings !== undefined) document.getElementById("bf-fittings").value = String(b.fittings);
+        if (b.devices !== undefined) document.getElementById("bf-devices").value = String(b.devices);
+        if (b.devAwg !== undefined) document.getElementById("bf-dev-awg").value = String(b.devAwg);
+        if (b.egcs !== undefined) document.getElementById("bf-egcs").value = String(b.egcs);
+        if (b.egcAwg !== undefined) document.getElementById("bf-egc-awg").value = String(b.egcAwg);
+        if (b.box) document.getElementById("bf-box").value = String(b.box);
+        if (b.gangs !== undefined) document.getElementById("bf-gangs").value = String(b.gangs);
+        if (b.ring !== undefined) document.getElementById("bf-ring").value = String(b.ring);
+        if (b.custom !== undefined) document.getElementById("bf-custom").value = String(b.custom);
+      }
+    } catch (e) {}
+  }
+
+  function renderBoxFill() {
+    var cnts = {
+      "14 AWG": Math.max(0, Math.floor(Number(document.getElementById("bf-14").value || 0))),
+      "12 AWG": Math.max(0, Math.floor(Number(document.getElementById("bf-12").value || 0))),
+      "10 AWG": Math.max(0, Math.floor(Number(document.getElementById("bf-10").value || 0))),
+      "8 AWG":  Math.max(0, Math.floor(Number(document.getElementById("bf-8").value || 0))),
+      "6 AWG":  Math.max(0, Math.floor(Number(document.getElementById("bf-6").value || 0)))
+    };
+
+    var condVol = 0.0, totConds = 0, largestAwg = "", condParts = [];
+    for (var i = 0; i < BF_AWG_LIST.length; i++) {
+      var a = BF_AWG_LIST[i];
+      var n = cnts[a];
+      totConds += n;
+      if (n > 0) {
+        condVol += n * BF_VOL[a];
+        largestAwg = a;
+        condParts.push(n + "x" + a.replace(" AWG", ""));
+      }
+    }
+
+    var devSel = document.getElementById("bf-dev-awg").value;
+    var egcSel = document.getElementById("bf-egc-awg").value;
+    var effLargest = largestAwg || (BF_VOL[devSel] ? devSel : (BF_VOL[egcSel] ? egcSel : "14 AWG"));
+    var largestUnit = BF_VOL[effLargest];
+
+    var hasClamps = document.getElementById("bf-clamps").checked;
+    var fitCnt = Math.max(0, Math.floor(Number(document.getElementById("bf-fittings").value || 0)));
+    var devCnt = Math.max(0, Math.floor(Number(document.getElementById("bf-devices").value || 0)));
+    var egcCnt = Math.max(0, Math.floor(Number(document.getElementById("bf-egcs").value || 0)));
+
+    var clampVol = (hasClamps && (totConds > 0 || egcCnt > 0)) ? largestUnit : 0.0;
+    var fitVol = fitCnt * largestUnit;
+    var devAwg = BF_VOL[devSel] ? devSel : effLargest;
+    var devVol = devCnt * 2.0 * BF_VOL[devAwg];
+    var egcAwg = BF_VOL[egcSel] ? egcSel : effLargest;
+    var egcMult = egcCnt === 0 ? 0.0 : (egcCnt <= 4 ? 1.0 : (1.0 + 0.25 * (egcCnt - 4)));
+    var egcVol = egcMult * BF_VOL[egcAwg];
+
+    var reqVol = condVol + clampVol + fitVol + devVol + egcVol;
+
+    var boxId = document.getElementById("bf-box").value;
+    var boxSpec = BF_BOXES.find(function(x){ return x.id === boxId; }) || BF_BOXES[2];
+    var gangsEl = document.getElementById("bf-gangs");
+    gangsEl.disabled = (boxSpec.gangable === false);
+    var effGangs = boxSpec.gangable ? Math.max(1, Math.min(4, Number(gangsEl.value || 1))) : 1;
+
+    var ringVol = Math.max(0, Number(document.getElementById("bf-ring").value || 0));
+    var customVol = Math.max(0, Number(document.getElementById("bf-custom").value || 0));
+    var availVol = customVol > 0 ? (customVol + ringVol) : ((boxSpec.vol * effGangs) + ringVol);
+    var boxLabel = customVol > 0
+      ? ("Custom (" + customVol.toFixed(1) + " in3)")
+      : (effGangs > 1 ? (effGangs + "-Gang " + boxSpec.lbl) : boxSpec.lbl);
+    if (ringVol > 0) boxLabel = boxLabel + " + " + ringVol.toFixed(1) + " ring";
+
+    var fillPct = availVol > 0 ? ((reqVol / availVol) * 100.0) : 0.0;
+    var spare = availVol - reqVol;
+    var pass = reqVol <= availVol + 0.001;
+
+    var minSq = "Exceeds 4-11/16 Deep (use j-box)";
+    for (var s = 0; s < BF_BOXES.length; s++) {
+      var bx = BF_BOXES[s];
+      if ((bx.grp === "4-Square" || bx.grp === "4-11/16") && (bx.vol + ringVol) >= reqVol - 0.001) {
+        minSq = bx.lbl + " (" + (bx.vol + ringVol).toFixed(1) + " in3)";
+        break;
+      }
+    }
+    var sortedBoxes = BF_BOXES.slice().sort(function(a, b){ return a.vol - b.vol; });
+    var minAny = "Use multi-gang or 314.28 pull box";
+    for (var k = 0; k < sortedBoxes.length; k++) {
+      if ((sortedBoxes[k].vol + ringVol) >= reqVol - 0.001) {
+        minAny = sortedBoxes[k].lbl + " (" + (sortedBoxes[k].vol + ringVol).toFixed(1) + " in3)";
+        break;
+      }
+    }
+
+    document.getElementById("bf-formula").textContent =
+      "NEC 314.16 [" + (condParts.length > 0 ? condParts.join(" + ") : "0 conds") + " | Largest: " + effLargest + "]: " +
+      "Conds " + condVol.toFixed(2) + " + Clamps/Fit " + (clampVol + fitVol).toFixed(2) +
+      " + Devices " + devVol.toFixed(2) + " + EGCs " + egcVol.toFixed(2) +
+      " = " + reqVol.toFixed(2) + " in3  vs  " + availVol.toFixed(1) + " in3 (" + fillPct.toFixed(1) + "% " + (pass ? "PASS" : "OVERFILL") + ")";
+
+    buildStatCards(document.getElementById("bf-summary"), [
+      {
+        lbl: "Box Compliance (" + boxLabel + ")",
+        val: (pass ? "PASS: " : "OVERFILL: ") + reqVol.toFixed(2) + " / " + availVol.toFixed(1) + " in3 (" + fillPct.toFixed(1) + "%)",
+        sub: pass ? ("Spare capacity: +" + spare.toFixed(2) + " in3") : ("Short by " + Math.abs(spare).toFixed(2) + " in3 - upsize box or add mud/ext ring"),
+        cls: pass ? (fillPct > 85.0 ? "pill-m" : "pill-o") : "pill-hi"
+      },
+      {
+        lbl: "Conductor Fill (NEC 314.16(B)(1))",
+        val: condVol.toFixed(2) + " in3  (" + totConds + " conductors)",
+        sub: (condParts.length > 0 ? condParts.join(", ") : "None") + " | Largest in box: " + effLargest + " (" + largestUnit.toFixed(2) + " in3)",
+        cls: "pill-w"
+      },
+      {
+        lbl: "Clamps & Support Fittings (314.16(B)(2)-(3))",
+        val: (clampVol + fitVol).toFixed(2) + " in3",
+        sub: "Clamps: " + (clampVol > 0 ? ("1x " + effLargest + " (" + clampVol.toFixed(2) + ")") : "0") + " | Studs/Hickeys: " + fitCnt + " (" + fitVol.toFixed(2) + ")",
+        cls: "pill-t"
+      },
+      {
+        lbl: "Device / Yoke Fill (NEC 314.16(B)(4))",
+        val: devVol.toFixed(2) + " in3  (" + devCnt + " yoke" + (devCnt === 1 ? "" : "s") + ")",
+        sub: devCnt > 0 ? (devCnt + " x 2 x " + devAwg + " (" + BF_VOL[devAwg].toFixed(2) + " in3/ea)") : "No devices in box",
+        cls: "pill-m"
+      },
+      {
+        lbl: "EGC Fill (2020/2023 NEC 314.16(B)(5))",
+        val: egcVol.toFixed(2) + " in3  (" + egcCnt + " EGC" + (egcCnt === 1 ? "" : "s") + ")",
+        sub: egcCnt > 0 ? (egcMult.toFixed(2) + "x " + egcAwg + " (" + (egcCnt <= 4 ? "1-4 EGCs = 1.0x" : ("1.0 + " + (egcCnt - 4) + "x0.25")) + ")") : "No EGCs entered",
+        cls: "pill-o"
+      },
+      {
+        lbl: "Minimum Compliant Metal Box (Table 314.16(A))",
+        val: minSq,
+        sub: "Smallest overall: " + minAny,
+        cls: "pill-c"
+      }
+    ]);
+
+    saveBoxFillLocal();
+  }
+
+
   function renderFeederSummary(ambC, maxVd, autoVd) {
     var fTopo = document.getElementById("feeder-topo").value;
     var fScope = document.getElementById("feeder-scope").value;
@@ -1838,6 +2124,7 @@
 
     renderQuickLookup(amb);
     renderConduitBending();
+    renderBoxFill();
     renderFeederSummary(amb, maxVd, autoVd);
     renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
@@ -2241,6 +2528,24 @@
     }
   });
   loadBendingLocal();
+
+  ["bf-14","bf-12","bf-10","bf-8","bf-6","bf-clamps","bf-fittings","bf-devices","bf-dev-awg","bf-egcs","bf-egc-awg","bf-box","bf-gangs","bf-ring","bf-custom"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) {
+      el.onchange = renderBoxFill;
+      el.oninput = renderBoxFill;
+    }
+  });
+  document.getElementById("btn-bf-clear").onclick = function() {
+    ["bf-14","bf-12","bf-10","bf-8","bf-6","bf-fittings","bf-devices","bf-egcs","bf-ring"].forEach(function(id){
+      document.getElementById(id).value = "0";
+    });
+    document.getElementById("bf-clamps").checked = false;
+    document.getElementById("bf-custom").value = "";
+    renderBoxFill();
+  };
+  loadBoxFillLocal();
+
 
 
 
