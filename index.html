@@ -59,6 +59,7 @@
   .formula-strip.emerald { border-left-color:#10b981; }
   .formula-strip.purple { border-left-color:#a855f7; }
   .formula-strip.cyan { border-left-color:#06b6d4; }
+  .formula-strip.rose { border-left-color:#f43f5e; }
   .bend-ref { margin-top:10px; padding:8px 10px; background:#0f172a; border:1px solid #334155; border-radius:6px; font-size:11px; color:#94a3b8; line-height:1.6; }
   .bend-ref b { color:#e2e8f0; }
   @media (max-width: 768px) {
@@ -102,7 +103,7 @@
   <button class="tab-btn" data-tab="transformer">Transformer &amp; SCA</button>
   <button class="tab-btn" data-tab="raceway">Shared Raceway</button>
   <button class="tab-btn" data-tab="bending">Conduit Bending</button>
-  <button class="tab-btn" data-tab="boxfill">Box Fill (314.16)</button>
+  <button class="tab-btn" data-tab="boxfill">Box Fill (314.16 / 314.28)</button>
 </div>
 
 <div class="card" id="card-quick" data-section="quick">
@@ -523,6 +524,61 @@
     Pigtails inside box = 0 | Unbroken pass-through (&lt;12&quot; loop) = 1 | External connectors/locknuts = 0 |
     Conductors <b>4 AWG &amp; larger</b> must be sized as pull/junction boxes per <b>NEC 314.28</b> (6x/8x trade size).
   </div>
+
+  <hr style="border:none;border-top:1px solid #334155;margin:18px 0 14px 0;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+      <h2>NEC 314.28 Pull &amp; Junction Box Sizing (Conductors 4 AWG &amp; Larger)</h2>
+      <div class="sub">Straight Pulls (8x largest) | Angle &amp; U-Pulls (6x largest + remaining raceways in row) | Same-conductor entry spacing (6x) | Table 312.6(A) cover depth exception</div>
+    </div>
+  </div>
+  <div class="bar" style="margin-top:10px;margin-bottom:8px;">
+    <span style="color:#fda4af;font-weight:600;">Pull Type &amp; Wire:</span>
+    <label>Pull:
+      <select id="pb-mode" class="sel">
+        <option value="straight">Straight Pull (8x Largest — 314.28(A)(1))</option>
+        <option value="angle" selected>Angle Pull 90&deg; (6x + Others — 314.28(A)(2))</option>
+        <option value="upull">U-Pull Same Wall (6x + Others — 314.28(A)(2))</option>
+      </select>
+    </label>
+    <label title="Used for NEC 314.28(A)(2) Exception / Table 312.6(A) minimum depth opposite removable cover">Largest Wire:
+      <select id="pb-wire" class="sel">
+        <option value="4 AWG">4 AWG (2&quot;)</option><option value="3 AWG">3 AWG (2&quot;)</option>
+        <option value="2 AWG">2 AWG (2-1/2&quot;)</option><option value="1 AWG">1 AWG (3&quot;)</option>
+        <option value="1/0 AWG">1/0 AWG (3-1/2&quot;)</option><option value="2/0 AWG">2/0 AWG (3-1/2&quot;)</option>
+        <option value="3/0 AWG" selected>3/0 AWG (4&quot;)</option><option value="4/0 AWG">4/0 AWG (4&quot;)</option>
+        <option value="250 kcmil">250 kcmil (4-1/2&quot;)</option><option value="300 kcmil">300 kcmil (5&quot;)</option>
+        <option value="350 kcmil">350 kcmil (5&quot;)</option><option value="400 kcmil">400 kcmil (6&quot;)</option>
+        <option value="500 kcmil">500 kcmil (6&quot;)</option><option value="600 kcmil">600 kcmil (8&quot;)</option>
+        <option value="750 kcmil">750 kcmil (8&quot;)</option>
+      </select>
+    </label>
+    <label title="Optional on-hand enclosure width (Wall A to Opp) to check pass/fail">Check W (in): <input id="pb-chk-w" class="in" style="width:56px;" type="number" step="1" min="0" placeholder="Auto"></label>
+    <label title="Optional on-hand enclosure height (Wall B to Opp) to check pass/fail">Check H (in): <input id="pb-chk-h" class="in" style="width:56px;" type="number" step="1" min="0" placeholder="Auto"></label>
+  </div>
+  <div class="bar" style="margin-bottom:8px;">
+    <span style="color:#7dd3fc;font-weight:600;">Wall A Row (Entry):</span>
+    <label>Size 1: <select id="pb-a1-sz" class="sel"><option value="0">None</option><option value="0.75">3/4&quot;</option><option value="1">1&quot;</option><option value="1.25">1-1/4&quot;</option><option value="1.5">1-1/2&quot;</option><option value="2">2&quot;</option><option value="2.5">2-1/2&quot;</option><option value="3">3&quot;</option><option value="3.5">3-1/2&quot;</option><option value="4">4&quot;</option><option value="5">5&quot;</option><option value="6">6&quot;</option></select> &times; <input id="pb-a1-qty" class="in" style="width:46px;" type="number" step="1" min="0" value="2"></label>
+    <label>Size 2: <select id="pb-a2-sz" class="sel"><option value="0">None</option><option value="0.75">3/4&quot;</option><option value="1">1&quot;</option><option value="1.25">1-1/4&quot;</option><option value="1.5">1-1/2&quot;</option><option value="2">2&quot;</option><option value="2.5">2-1/2&quot;</option><option value="3">3&quot;</option><option value="3.5">3-1/2&quot;</option><option value="4">4&quot;</option><option value="5">5&quot;</option><option value="6">6&quot;</option></select> &times; <input id="pb-a2-qty" class="in" style="width:46px;" type="number" step="1" min="0" value="1"></label>
+    <label>Size 3: <select id="pb-a3-sz" class="sel"><option value="0">None</option><option value="0.75">3/4&quot;</option><option value="1">1&quot;</option><option value="1.25">1-1/4&quot;</option><option value="1.5">1-1/2&quot;</option><option value="2">2&quot;</option><option value="2.5">2-1/2&quot;</option><option value="3">3&quot;</option><option value="3.5">3-1/2&quot;</option><option value="4">4&quot;</option><option value="5">5&quot;</option><option value="6">6&quot;</option></select> &times; <input id="pb-a3-qty" class="in" style="width:46px;" type="number" step="1" min="0" value="0"></label>
+  </div>
+  <div class="bar" id="pb-wallb-bar" style="margin-bottom:0;">
+    <span style="color:#fcd34d;font-weight:600;">Wall B Row (Adjacent Exit):</span>
+    <label><input id="pb-same-b" type="checkbox" checked> Wall B matches Wall A</label>
+    <label>Size 1: <select id="pb-b1-sz" class="sel"><option value="0">None</option><option value="0.75">3/4&quot;</option><option value="1">1&quot;</option><option value="1.25">1-1/4&quot;</option><option value="1.5">1-1/2&quot;</option><option value="2">2&quot;</option><option value="2.5">2-1/2&quot;</option><option value="3">3&quot;</option><option value="3.5">3-1/2&quot;</option><option value="4">4&quot;</option><option value="5">5&quot;</option><option value="6">6&quot;</option></select> &times; <input id="pb-b1-qty" class="in" style="width:46px;" type="number" step="1" min="0" value="2"></label>
+    <label>Size 2: <select id="pb-b2-sz" class="sel"><option value="0">None</option><option value="0.75">3/4&quot;</option><option value="1">1&quot;</option><option value="1.25">1-1/4&quot;</option><option value="1.5">1-1/2&quot;</option><option value="2">2&quot;</option><option value="2.5">2-1/2&quot;</option><option value="3">3&quot;</option><option value="3.5">3-1/2&quot;</option><option value="4">4&quot;</option><option value="5">5&quot;</option><option value="6">6&quot;</option></select> &times; <input id="pb-b2-qty" class="in" style="width:46px;" type="number" step="1" min="0" value="1"></label>
+  </div>
+  <div id="pb-formula" class="formula-strip rose mono"></div>
+  <div id="pb-summary" class="grid-boxes"></div>
+  <div class="bend-ref mono">
+    <b>NEC 314.28 Quick Notes:</b>
+    <b>U-Pulls:</b> Include <b>both</b> entering and exiting raceways on Wall A (e.g., one 2&quot; U-pull = 2&times; 2&quot; on Wall A &rarr; 6&times;2&quot;+2&quot;=14&quot;).
+    &nbsp;&bull;&nbsp;
+    <b>Multiple Rows:</b> Size each row separately and use the largest result.
+    &nbsp;&bull;&nbsp;
+    <b>Removable Cover Exception (314.28(A)(2)):</b> Back-wall entry opposite a removable cover may use Table 312.6(A) depth.
+  </div>
+
 </div>
 
 <script id="init-data" type="application/json">[{"ref": "L1", "name": "3P/480V 10 HP Blower Motor", "topology": "3P/480VAC", "material": "CU", "motor_hp": "10", "is_motor": true, "in_raceway": true, "kw": 7.46, "pf": 0.85, "length_ft": 125.0, "continuous": true, "fla": 14.0, "design_amps": 17.5, "ocpd_amps": 35, "wire_60c": "12 AWG", "wire_75c": "14 AWG", "wire_90c": "14 AWG", "wire_awg": "14 AWG", "egc_awg": "14 AWG", "upsized_for_vd": false, "vd_volts": 8.08, "vd_pct": 1.68, "emt_trade": "1/2\" EMT", "emt_fill_pct": 12.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 12.4, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 13.6, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L2", "name": "3P/480V 25 HP Process Pump", "topology": "3P/480VAC", "material": "CU", "motor_hp": "25", "is_motor": true, "in_raceway": true, "kw": 18.65, "pf": 0.85, "length_ft": 120.0, "continuous": true, "fla": 34.0, "design_amps": 42.5, "ocpd_amps": 90, "wire_60c": "6 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "8 AWG", "upsized_for_vd": false, "vd_volts": 4.88, "vd_pct": 1.02, "emt_trade": "3/4\" EMT", "emt_fill_pct": 27.5, "rmc_trade": "3/4\" RMC", "rmc_fill_pct": 26.7, "pvc_trade": "3/4\" PVC40", "pvc_fill_pct": 28.8, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}, {"ref": "L3", "name": "3P/480V 10 kW Duct Heater", "topology": "3P/480VAC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 10.0, "pf": 1.0, "length_ft": 100.0, "continuous": true, "fla": 12.03, "design_amps": 15.04, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "12 AWG", "egc_awg": "12 AWG", "upsized_for_vd": false, "vd_volts": 4.17, "vd_pct": 0.87, "emt_trade": "1/2\" EMT", "emt_fill_pct": 17.5, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 16.9, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 18.7, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L4", "name": "1P/120V Control / Aux Load", "topology": "1P/120VAC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 1.8, "pf": 1.0, "length_ft": 80.0, "continuous": true, "fla": 15.0, "design_amps": 18.75, "ocpd_amps": 20, "wire_60c": "12 AWG", "wire_75c": "12 AWG", "wire_90c": "12 AWG", "wire_awg": "10 AWG", "egc_awg": "10 AWG", "upsized_for_vd": true, "vd_volts": 2.88, "vd_pct": 2.4, "emt_trade": "1/2\" EMT", "emt_fill_pct": 20.8, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 20.2, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 22.2, "ab_overload": "AB 193-EC1AJ (12.0-18.0A)", "sqd_overload": "SqD LRD21 (12.0-18.0A)", "ol_range": "12.0-18.0A"}, {"ref": "L5", "name": "250VDC Bus / Motor Load", "topology": "250VDC", "material": "CU", "motor_hp": "", "is_motor": false, "in_raceway": false, "kw": 8.0, "pf": 1.0, "length_ft": 110.0, "continuous": true, "fla": 32.0, "design_amps": 40.0, "ocpd_amps": 40, "wire_60c": "8 AWG", "wire_75c": "8 AWG", "wire_90c": "8 AWG", "wire_awg": "8 AWG", "egc_awg": "10 AWG", "upsized_for_vd": false, "vd_volts": 5.49, "vd_pct": 2.2, "emt_trade": "1/2\" EMT", "emt_fill_pct": 31.0, "rmc_trade": "1/2\" RMC", "rmc_fill_pct": 30.0, "pvc_trade": "1/2\" PVC40", "pvc_fill_pct": 33.1, "ab_overload": "AB 193-EC2AM (30.0-40.0A)", "sqd_overload": "SqD LRD325 (30.0-40.0A)", "ol_range": "30.0-40.0A"}]</script>
@@ -1742,6 +1798,251 @@
   }
 
 
+  var PB_KEY = "nec_pull_box_314_28_v19";
+
+  var NEC_312_6A = {
+    "4 AWG":2.0, "3 AWG":2.0, "2 AWG":2.5, "1 AWG":3.0, "1/0 AWG":3.5,
+    "2/0 AWG":3.5, "3/0 AWG":4.0, "4/0 AWG":4.0, "250 kcmil":4.5, "300 kcmil":5.0,
+    "350 kcmil":5.0, "400 kcmil":6.0, "500 kcmil":6.0, "600 kcmil":8.0, "750 kcmil":8.0
+  };
+  var PB_NEMA_DIMS = [6, 8, 10, 12, 16, 18, 20, 24, 30, 36, 42, 48, 60];
+  var PB_NEMA_DEPTHS = [4, 6, 8, 10, 12, 16, 20];
+
+  function pbPickNema(reqVal, tbl) {
+    for (var i = 0; i < tbl.length; i++) {
+      if (tbl[i] >= reqVal - 0.001) return tbl[i];
+    }
+    return Math.ceil(reqVal);
+  }
+
+  function pbFmtTrade(sz) {
+    if (Math.abs(sz - 0.75) < 0.01) return '3/4"';
+    if (Math.abs(sz - 1.25) < 0.01) return '1-1/4"';
+    if (Math.abs(sz - 1.5) < 0.01) return '1-1/2"';
+    if (Math.abs(sz - 2.5) < 0.01) return '2-1/2"';
+    if (Math.abs(sz - 3.5) < 0.01) return '3-1/2"';
+    return sz + '"';
+  }
+
+  function pbCollectRow(pairs) {
+    var list = [];
+    for (var i = 0; i < pairs.length; i++) {
+      var sz = Number(document.getElementById(pairs[i][0]).value || 0);
+      var qty = Math.max(0, Math.floor(Number(document.getElementById(pairs[i][1]).value || 0)));
+      if (sz > 0 && qty > 0) {
+        for (var q = 0; q < qty; q++) list.push(sz);
+      }
+    }
+    return list;
+  }
+
+  function pbCalcAngleRow(list) {
+    if (list.length === 0) return { dim:0, max:0, others:0 };
+    var sorted = list.slice().sort(function(a, b){ return b - a; });
+    var largest = sorted[0];
+    var others = 0;
+    for (var i = 1; i < sorted.length; i++) others += sorted[i];
+    return { dim: (6.0 * largest) + others, max: largest, others: others };
+  }
+
+  function savePullBoxLocal() {
+    try {
+      localStorage.setItem(PB_KEY, JSON.stringify({
+        mode: document.getElementById("pb-mode").value,
+        wire: document.getElementById("pb-wire").value,
+        chkW: document.getElementById("pb-chk-w").value,
+        chkH: document.getElementById("pb-chk-h").value,
+        a1Sz: document.getElementById("pb-a1-sz").value,
+        a1Qty: document.getElementById("pb-a1-qty").value,
+        a2Sz: document.getElementById("pb-a2-sz").value,
+        a2Qty: document.getElementById("pb-a2-qty").value,
+        a3Sz: document.getElementById("pb-a3-sz").value,
+        a3Qty: document.getElementById("pb-a3-qty").value,
+        sameB: document.getElementById("pb-same-b").checked,
+        b1Sz: document.getElementById("pb-b1-sz").value,
+        b1Qty: document.getElementById("pb-b1-qty").value,
+        b2Sz: document.getElementById("pb-b2-sz").value,
+        b2Qty: document.getElementById("pb-b2-qty").value
+      }));
+    } catch (e) {}
+  }
+
+  function loadPullBoxLocal() {
+    document.getElementById("pb-a1-sz").value = "2";
+    document.getElementById("pb-a2-sz").value = "1.5";
+    document.getElementById("pb-a3-sz").value = "0";
+    document.getElementById("pb-b1-sz").value = "2";
+    document.getElementById("pb-b2-sz").value = "1.5";
+    try {
+      var raw = localStorage.getItem(PB_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p.mode) document.getElementById("pb-mode").value = p.mode;
+        if (p.wire && NEC_312_6A[p.wire]) document.getElementById("pb-wire").value = p.wire;
+        if (p.chkW !== undefined) document.getElementById("pb-chk-w").value = String(p.chkW);
+        if (p.chkH !== undefined) document.getElementById("pb-chk-h").value = String(p.chkH);
+        if (p.a1Sz !== undefined) document.getElementById("pb-a1-sz").value = String(p.a1Sz);
+        if (p.a1Qty !== undefined) document.getElementById("pb-a1-qty").value = String(p.a1Qty);
+        if (p.a2Sz !== undefined) document.getElementById("pb-a2-sz").value = String(p.a2Sz);
+        if (p.a2Qty !== undefined) document.getElementById("pb-a2-qty").value = String(p.a2Qty);
+        if (p.a3Sz !== undefined) document.getElementById("pb-a3-sz").value = String(p.a3Sz);
+        if (p.a3Qty !== undefined) document.getElementById("pb-a3-qty").value = String(p.a3Qty);
+        if (p.sameB !== undefined) document.getElementById("pb-same-b").checked = Boolean(p.sameB);
+        if (p.b1Sz !== undefined) document.getElementById("pb-b1-sz").value = String(p.b1Sz);
+        if (p.b1Qty !== undefined) document.getElementById("pb-b1-qty").value = String(p.b1Qty);
+        if (p.b2Sz !== undefined) document.getElementById("pb-b2-sz").value = String(p.b2Sz);
+        if (p.b2Qty !== undefined) document.getElementById("pb-b2-qty").value = String(p.b2Qty);
+      }
+    } catch (e) {}
+  }
+
+  function renderPullBox31428() {
+    var mode = document.getElementById("pb-mode").value;
+    var wire = document.getElementById("pb-wire").value;
+    var sameB = document.getElementById("pb-same-b").checked;
+    var chkW = Math.max(0, Number(document.getElementById("pb-chk-w").value || 0));
+    var chkH = Math.max(0, Number(document.getElementById("pb-chk-h").value || 0));
+
+    var wallBBar = document.getElementById("pb-wallb-bar");
+    wallBBar.style.display = (mode === "angle") ? "flex" : "none";
+    ["pb-b1-sz","pb-b1-qty","pb-b2-sz","pb-b2-qty"].forEach(function(id){
+      document.getElementById(id).disabled = sameB;
+    });
+
+    var rowA = pbCollectRow([["pb-a1-sz","pb-a1-qty"],["pb-a2-sz","pb-a2-qty"],["pb-a3-sz","pb-a3-qty"]]);
+    var rowB = (mode === "angle" && sameB === false)
+      ? pbCollectRow([["pb-b1-sz","pb-b1-qty"],["pb-b2-sz","pb-b2-qty"]])
+      : rowA.slice();
+
+    var fEl = document.getElementById("pb-formula");
+    var sEl = document.getElementById("pb-summary");
+
+    if (rowA.length === 0) {
+      fEl.textContent = "Enter at least 1 raceway (size and qty) in Wall A Row above to calculate NEC 314.28 pull box dimensions.";
+      sEl.innerHTML = "";
+      savePullBoxLocal();
+      return;
+    }
+
+    var dimA = 0, dimB = 0, maxA = 0, othersA = 0, maxB = 0, othersB = 0;
+    var entrySep = 0, cornerSetback = 0;
+    var dimALbl = "", dimASub = "", dimBLbl = "", dimBSub = "", fText = "";
+
+    var uniqueSizes = [];
+    var allForSep = mode === "angle" ? rowA.concat(rowB) : rowA;
+    for (var u = 0; u < allForSep.length; u++) {
+      if (uniqueSizes.indexOf(allForSep[u]) < 0) uniqueSizes.push(allForSep[u]);
+    }
+    uniqueSizes.sort(function(a, b){ return b - a; });
+
+    if (mode === "straight") {
+      maxA = uniqueSizes[0];
+      dimA = 8.0 * maxA;
+      var locknutSum = 0;
+      for (var i = 0; i < rowA.length; i++) locknutSum += (rowA[i] + 0.75);
+      dimB = locknutSum + 1.5;
+      dimALbl = "Min Box Length (NEC 314.28(A)(1) — 8x)";
+      dimASub = "8 x " + pbFmtTrade(maxA) + " largest trade size (" + rowA.length + " conduits in row; others do not add)";
+      dimBLbl = "Est. Min Box Width (Locknut Clearance)";
+      dimBSub = "Physical width for " + rowA.length + " locknuts + wrench spacing (verify hubs)";
+      fText = "314.28(A)(1) STRAIGHT PULL: Min Length = 8 x " + pbFmtTrade(maxA) + " = " + toFrac16(dimA) + " (" + dimA.toFixed(2) + '") | Est. Width >= ' + toFrac16(dimB);
+    } else if (mode === "angle") {
+      var resA = pbCalcAngleRow(rowA);
+      var resB = pbCalcAngleRow(rowB.length > 0 ? rowB : rowA);
+      dimA = resA.dim; maxA = resA.max; othersA = resA.others;
+      dimB = resB.dim; maxB = resB.max; othersB = resB.others;
+      var maxEntry = Math.max(maxA, maxB);
+      entrySep = 6.0 * maxEntry;
+      cornerSetback = entrySep / Math.sqrt(2.0);
+      dimALbl = "Wall A -> Opp Wall (Min Width, 6x + Others)";
+      dimASub = "6 x " + pbFmtTrade(maxA) + " + " + othersA.toFixed(2) + '" remaining (' + rowA.length + " raceways on Wall A)";
+      dimBLbl = "Wall B -> Opp Wall (Min Height, 6x + Others)";
+      dimBSub = "6 x " + pbFmtTrade(maxB) + " + " + othersB.toFixed(2) + '" remaining (' + (rowB.length > 0 ? rowB.length : rowA.length) + " raceways on Wall B)";
+      fText = "314.28(A)(2) ANGLE PULL: W >= 6x" + pbFmtTrade(maxA) + "+" + othersA.toFixed(2) + '" = ' + toFrac16(dimA) + " | H >= 6x" + pbFmtTrade(maxB) + "+" + othersB.toFixed(2) + '" = ' + toFrac16(dimB) + " | Same-Cond Sep >= " + toFrac16(entrySep);
+    } else {
+      var resU = pbCalcAngleRow(rowA);
+      dimA = resU.dim; maxA = resU.max; othersA = resU.others;
+      entrySep = 6.0 * maxA;
+      dimB = entrySep + (2.0 * maxA) + 2.0;
+      dimALbl = "U-Pull Wall -> Opp Wall (6x + Others)";
+      dimASub = "6 x " + pbFmtTrade(maxA) + " + " + othersA.toFixed(2) + '" remaining (' + rowA.length + " total entries on U-pull wall)";
+      dimBLbl = "Est. Min Entry Wall Width (6x Sep + Hubs)";
+      dimBSub = (rowA.length < 2 ? "Note: A U-pull needs >=2 raceways (entry & exit) on Wall A" : ("Fits " + toFrac16(entrySep) + " separation between entries + locknuts"));
+      fText = "314.28(A)(2) U-PULL: Opp Wall >= 6x" + pbFmtTrade(maxA) + "+" + othersA.toFixed(2) + '" = ' + toFrac16(dimA) + " | Same-Cond Entry Sep >= " + toFrac16(entrySep);
+    }
+
+    var depthExc = NEC_312_6A[wire] || 4.0;
+    var depthRec = pbPickNema(Math.max(depthExc, maxA + 2.0), PB_NEMA_DEPTHS);
+    var recW = pbPickNema(dimA, PB_NEMA_DIMS);
+    var recH = pbPickNema(dimB, PB_NEMA_DIMS);
+
+    var sepParts = [];
+    for (var k = 0; k < uniqueSizes.length; k++) {
+      sepParts.push(pbFmtTrade(uniqueSizes[k]) + " -> " + toFrac16(6.0 * uniqueSizes[k]));
+    }
+    var sepVal = mode === "straight" ? "N/A (Opposite Walls)" : (toFrac16(entrySep) + " (" + entrySep.toFixed(2) + '")');
+    var sepSub = mode === "straight"
+      ? "Straight pull governed by 8x length between opposite walls"
+      : (mode === "angle"
+          ? ("Per size: " + sepParts.join(", ") + " | Equidistant corner >= " + toFrac16(cornerSetback))
+          : ("Per size (center-to-center / nearest): " + sepParts.join(", ")));
+
+    var hasCustom = chkW > 0 && chkH > 0;
+    var customPass = hasCustom ? (chkW >= dimA - 0.001 && chkH >= dimB - 0.001) : true;
+    var chkVal = hasCustom
+      ? ((customPass ? "PASS: " : "UNDERSIZED: ") + chkW + '" x ' + chkH + '"')
+      : (rowA.length + " Raceway" + (rowA.length === 1 ? "" : "s") + " (Max " + pbFmtTrade(uniqueSizes[0]) + ")");
+    var chkSub = hasCustom
+      ? (customPass
+          ? ("Spare: +" + (chkW - dimA).toFixed(1) + '" W, +' + (chkH - dimB).toFixed(1) + '" H vs ' + dimA.toFixed(1) + '" x ' + dimB.toFixed(1) + '" min')
+          : ("Needs >= " + dimA.toFixed(1) + '" W x ' + dimB.toFixed(1) + '" H — upsize to ' + recW + '" x ' + recH + '"'))
+      : ("Enter Check W & Check H above to test a box on hand");
+
+    fEl.textContent = fText + " | 312.6(A) Depth >= " + toFrac16(depthExc) + " | Std NEMA: " + recW + '" x ' + recH + '" x ' + depthRec + '"';
+
+    buildStatCards(sEl, [
+      {
+        lbl: dimALbl,
+        val: toFrac16(dimA) + "  (" + dimA.toFixed(2) + '")',
+        sub: dimASub,
+        cls: "pill-w"
+      },
+      {
+        lbl: dimBLbl,
+        val: toFrac16(dimB) + "  (" + dimB.toFixed(2) + '")',
+        sub: dimBSub,
+        cls: (mode === "upull" && rowA.length < 2) ? "pill-m" : "pill-w"
+      },
+      {
+        lbl: "Min Distance Between Same-Conductor Entries (6x)",
+        val: sepVal,
+        sub: sepSub,
+        cls: mode === "straight" ? "pill-t" : "pill-m"
+      },
+      {
+        lbl: "Min Depth Opposite Removable Cover (Table 312.6(A))",
+        val: toFrac16(depthExc) + "  (" + wire + ", 1 wire/term)",
+        sub: "NEC 314.28(A)(2) Exc. (back-wall entry); otherwise use full 6x",
+        cls: "pill-o"
+      },
+      {
+        lbl: "Suggested Standard NEMA Pull Box (W x H x D)",
+        val: recW + '" x ' + recH + '" x ' + depthRec + '"',
+        sub: "Next standard NEMA 1 / 3R / 12 size >= " + dimA.toFixed(1) + '" x ' + dimB.toFixed(1) + '"',
+        cls: "pill-c"
+      },
+      {
+        lbl: hasCustom ? "Custom On-Hand Box Check" : "Pull Box Summary",
+        val: chkVal,
+        sub: chkSub,
+        cls: hasCustom ? (customPass ? "pill-o" : "pill-hi") : "pill-t"
+      }
+    ]);
+
+    savePullBoxLocal();
+  }
+
+
   function renderFeederSummary(ambC, maxVd, autoVd) {
     var fTopo = document.getElementById("feeder-topo").value;
     var fScope = document.getElementById("feeder-scope").value;
@@ -2125,6 +2426,7 @@
     renderQuickLookup(amb);
     renderConduitBending();
     renderBoxFill();
+    renderPullBox31428();
     renderFeederSummary(amb, maxVd, autoVd);
     renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
@@ -2545,6 +2847,16 @@
     renderBoxFill();
   };
   loadBoxFillLocal();
+
+  ["pb-mode","pb-wire","pb-chk-w","pb-chk-h","pb-a1-sz","pb-a1-qty","pb-a2-sz","pb-a2-qty","pb-a3-sz","pb-a3-qty","pb-same-b","pb-b1-sz","pb-b1-qty","pb-b2-sz","pb-b2-qty"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) {
+      el.onchange = renderPullBox31428;
+      el.oninput = renderPullBox31428;
+    }
+  });
+  loadPullBoxLocal();
+
 
 
 
