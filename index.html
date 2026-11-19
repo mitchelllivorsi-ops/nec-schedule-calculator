@@ -23,6 +23,8 @@
   button.sec { background:#334155; border-color:#475569; }
   button.del { background:transparent; border:1px solid #475569; color:#94a3b8; padding:2px 7px; font-size:12px; }
   button.del:hover { border-color:#ef4444; color:#fca5a5; }
+  button.io { background:#1e3a8a; border-color:#60a5fa; }
+  button.io:hover { background:#1d4ed8; }
   button.pdf { background:#0f766e; border-color:#2dd4bf; }
   button.pdf:disabled { opacity:0.6; cursor:wait; }
   button.install { background:#059669; border-color:#34d399; display:none; }
@@ -73,6 +75,9 @@
     <button id="btn-install" class="install">Install App</button>
     <button id="btn-pdf" class="pdf">Export PDF</button>
     <button id="btn-csv">Download CSV</button>
+    <button id="btn-save-json" class="io" title="Archive full panel design to .json">Save JSON</button>
+    <button id="btn-load-json" class="io" title="Reload a saved panel .json file">Load JSON</button>
+    <input id="file-load-json" type="file" accept=".json,application/json" style="display:none;">
     <button id="btn-print" class="sec">Print</button>
     <button id="btn-add" class="sec">+ Add Row</button>
     <button id="btn-reset" class="sec">Reset Defaults</button>
@@ -101,6 +106,7 @@
     <span id="summary-txt" class="mono" style="color:#38bdf8;margin-left:auto;"></span>
   </div>
   <div id="err-box" style="display:none;color:#fca5a5;background:rgba(239,68,68,0.2);padding:8px;border-radius:6px;margin-bottom:10px;font-family:monospace;font-size:12px;"></div>
+  <div id="ok-box" style="display:none;color:#6ee7b7;background:rgba(16,185,129,0.16);border:1px solid rgba(16,185,129,0.35);padding:8px;border-radius:6px;margin-bottom:10px;font-family:monospace;font-size:12px;"></div>
   <div class="wrap">
     <table>
       <thead>
@@ -171,21 +177,22 @@
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
       <h2>3-Phase / 1-Phase Step-Down &amp; Control Transformer Sizing (NEC Table 450.3(B))</h2>
-      <div class="sub">Calculates primary/secondary FLA, 125%/167%/250%/300% OCPD (&le;1000V), Class CC control fuses, primary EGC (250.122), and secondary GEC/SBJ (250.102(C)(1)).</div>
+      <div class="sub">Calculates primary/secondary FLA, 125%/167%/250%/300% OCPD (&le;1000V), NEC 240.4 primary wire, secondary GEC/SBJ (250.102(C)(1)), and bolted secondary SCA / AIC (NEC 110.9).</div>
     </div>
     <div class="bar" style="margin-bottom:0;">
       <label>Preset:
         <select id="xfmr-preset" class="sel">
           <option value="">Custom</option>
-          <option value="3,45,kVA,480,208,pri_sec">45 kVA 3P 480V -> 208Y/120V</option>
-          <option value="3,75,kVA,480,208,pri_sec">75 kVA 3P 480V -> 208Y/120V</option>
-          <option value="3,112.5,kVA,480,208,pri_sec">112.5 kVA 3P 480V -> 208Y/120V</option>
-          <option value="3,15,kVA,480,208,pri_sec">15 kVA 3P 480V -> 208Y/120V</option>
-          <option value="1,10,kVA,480,240,pri_sec">10 kVA 1P 480V -> 120/240V</option>
-          <option value="1,1000,VA,480,120,pri_sec">1000 VA 1P 480V -> 120V Control</option>
-          <option value="1,500,VA,480,120,pri_only">500 VA 1P 480V -> 120V Control</option>
-          <option value="1,250,VA,480,120,pri_only">250 VA 1P 480V -> 120V Control</option>
-          <option value="1,150,VA,480,24,pri_only">150 VA 1P 480V -> 24VAC Control</option>
+          <option value="3,45,kVA,480,208,pri_sec,4.5">45 kVA 3P 480V -> 208Y/120V (4.5%Z)</option>
+          <option value="3,75,kVA,480,208,pri_sec,4.5">75 kVA 3P 480V -> 208Y/120V (4.5%Z)</option>
+          <option value="3,112.5,kVA,480,208,pri_sec,4.5">112.5 kVA 3P 480V -> 208Y/120V (4.5%Z)</option>
+          <option value="3,300,kVA,480,208,pri_sec,5.0">300 kVA 3P 480V -> 208Y/120V (5.0%Z)</option>
+          <option value="3,15,kVA,480,208,pri_sec,4.5">15 kVA 3P 480V -> 208Y/120V (4.5%Z)</option>
+          <option value="1,10,kVA,480,240,pri_sec,3.5">10 kVA 1P 480V -> 120/240V (3.5%Z)</option>
+          <option value="1,1000,VA,480,120,pri_sec,4.0">1000 VA 1P 480V -> 120V Control (4.0%Z)</option>
+          <option value="1,500,VA,480,120,pri_only,5.0">500 VA 1P 480V -> 120V Control (5.0%Z)</option>
+          <option value="1,250,VA,480,120,pri_only,6.0">250 VA 1P 480V -> 120V Control (6.0%Z)</option>
+          <option value="1,150,VA,480,24,pri_only,6.0">150 VA 1P 480V -> 24VAC Control (6.0%Z)</option>
         </select>
       </label>
       <label>Phase:
@@ -209,6 +216,7 @@
           <option value="pri_only">Primary Only (125% / 167% / 300%)</option>
         </select>
       </label>
+      <label title="Transformer nameplate percent impedance">%Z: <input id="xfmr-zpct" class="in" style="width:56px;" type="number" step="0.1" min="0.5" max="20" value="4.5"></label>
       <label>Mat:
         <select id="xfmr-mat" class="sel">
           <option value="CU">Cu</option>
@@ -689,12 +697,24 @@
     var secDisp = scheme === "pri_only" ? "Optional (Pri-Only)" : (secOcpd > 0 ? (secOcpd + " A") : ("<= " + secRaw.toFixed(2) + " A"));
     if (secCc > 0 && secCc !== secOcpd) secDisp = secDisp + " (or " + secCc + "A CC)";
 
+    var zPct = Math.max(0.1, Number(document.getElementById("xfmr-zpct").value || 4.5));
+    var scaAmps = iSec > 0 ? (iSec / (zPct / 100.0)) : 0;
+    var scaKa = scaAmps / 1000.0;
+    var aicTiers = [10, 14, 18, 22, 25, 35, 42, 50, 65, 100, 150, 200];
+    var minAic = aicTiers[aicTiers.length - 1];
+    for (var ai = 0; ai < aicTiers.length; ai++) {
+      if (aicTiers[ai] >= scaKa - 0.001) { minAic = aicTiers[ai]; break; }
+    }
+    var scaPill = scaKa > 22.0 ? "pill-hi" : (scaKa > 10.0 ? "pill-m" : "pill-o");
+    var scaSub = "Min AIC/SCCR >= " + minAic + " kA (NEC 110.9) | " + (ph === 1 && vSec === 240 ? "1P 240V L-N ~1.3-1.5x L-L" : "Upper bound at sec lugs");
+
     var fText =
-      "NEC 450.3(B) [" + (unit === "VA" ? (rawVal + " VA") : (kva + " kVA")) + " " + ph + "P " + vPri + "V -> " + vSec + "V]: " +
+      "NEC 450.3(B) [" + (unit === "VA" ? (rawVal + " VA") : (kva + " kVA")) + " " + ph + "P " + vPri + "V -> " + vSec + "V @ " + zPct.toFixed(1) + "%Z]: " +
       "I_pri = " + iPri.toFixed(2) + "A x " + Math.round(priMult * 100) + "% = " + priRaw.toFixed(2) + "A (" + priRule + ")";
     if (scheme === "pri_sec") {
       fText = fText + "  |  I_sec = " + iSec.toFixed(2) + "A x " + Math.round(secMult * 100) + "% = " + secRaw.toFixed(2) + "A (" + secRule + ")";
     }
+    fText = fText + "  |  Bolted SCA = " + Math.round(scaAmps).toLocaleString() + " A (" + scaKa.toFixed(2) + " kA sym -> " + minAic + " kA AIC)";
     document.getElementById("xfmr-formula").textContent = fText;
 
     var pfxA = priMin.sets > 1 ? (priMin.sets + "x ") : "";
@@ -754,6 +774,12 @@
         val: secEmt.text,
         sub: "RMC: " + secRmc.text + " | PVC: " + secPvc.text,
         cls: secEmt.over ? "pill-hi" : "pill-c"
+      },
+      {
+        lbl: "Sec. Bolted Fault SCA (Inf. Bus @ " + zPct.toFixed(1) + "%Z)",
+        val: Math.round(scaAmps).toLocaleString() + " A (" + scaKa.toFixed(2) + " kA sym)",
+        sub: scaSub,
+        cls: scaPill
       }
     ]);
   }
@@ -1142,6 +1168,7 @@
     renderTransformer(amb);
     renderSharedRaceway(checkedRows, totalCcc, sharedBFac);
     saveState();
+    if (typeof saveSettingsLocal === "function") saveSettingsLocal();
   }
 
   document.getElementById("global-mat").onchange = function() {
@@ -1160,9 +1187,10 @@
     document.getElementById("xfmr-vpri").value = parts[3];
     document.getElementById("xfmr-vsec").value = parts[4];
     document.getElementById("xfmr-scheme").value = parts[5];
+    if (parts[6]) document.getElementById("xfmr-zpct").value = parts[6];
     recalc();
   };
-  ["motor-ocpd-mode","amb-c","max-vd","auto-vd","apply-bundle-derate","feeder-topo","feeder-scope","feeder-mat","feeder-ft","xfmr-ph","xfmr-val","xfmr-unit","xfmr-vpri","xfmr-vsec","xfmr-scheme","xfmr-mat"].forEach(function(id){
+  ["motor-ocpd-mode","amb-c","max-vd","auto-vd","apply-bundle-derate","feeder-topo","feeder-scope","feeder-mat","feeder-ft","xfmr-ph","xfmr-val","xfmr-unit","xfmr-vpri","xfmr-vsec","xfmr-scheme","xfmr-mat","xfmr-zpct"].forEach(function(id){
     document.getElementById(id).onchange = recalc;
   });
 
@@ -1179,6 +1207,8 @@
     ROWS = cloneDefaults();
     try {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SETTINGS_KEY);
+      localStorage.removeItem(PROJ_KEY);
       for (var pk = 0; pk < PREV_KEYS.length; pk++) localStorage.removeItem(PREV_KEYS[pk]);
     } catch (e) {}
     recalc();
@@ -1196,6 +1226,7 @@
   } catch (e) {}
   projInput.onchange = function() {
     try { localStorage.setItem(PROJ_KEY, projInput.value); } catch (e) {}
+    if (typeof saveSettingsLocal === "function") saveSettingsLocal();
   };
 
   document.getElementById("btn-pdf").onclick = function() {
@@ -1245,7 +1276,8 @@
         v_pri: Number(document.getElementById("xfmr-vpri").value || 480),
         v_sec: Number(document.getElementById("xfmr-vsec").value || 208),
         scheme: document.getElementById("xfmr-scheme").value,
-        material: document.getElementById("xfmr-mat").value
+        material: document.getElementById("xfmr-mat").value,
+        z_pct: Number(document.getElementById("xfmr-zpct").value || 4.5)
       },
       rows: cleanRows
     };
@@ -1281,6 +1313,187 @@
       btn.textContent = "Export PDF";
     });
   };
+
+  var SETTINGS_KEY = "nec_standalone_settings_v12";
+
+  function showNotice(msg, isError) {
+    var eb = document.getElementById("err-box");
+    var ob = document.getElementById("ok-box");
+    if (isError) {
+      if (ob) ob.style.display = "none";
+      if (eb) { eb.style.display = "block"; eb.textContent = msg; }
+    } else {
+      if (eb) eb.style.display = "none";
+      if (ob) {
+        ob.style.display = "block";
+        ob.textContent = msg;
+        clearTimeout(window._okTimer);
+        window._okTimer = setTimeout(function() { ob.style.display = "none"; }, 5000);
+      }
+    }
+  }
+
+  function collectProjectData() {
+    var cleanRows = [];
+    for (var i = 0; i < ROWS.length; i++) {
+      var r = ROWS[i];
+      cleanRows.push({
+        ref: String(r.ref || ("L" + (i + 1))),
+        name: String(r.name || ("Load " + (i + 1))),
+        topology: TOPO[r.topology] ? r.topology : "3P/480VAC",
+        motor_hp: r.motor_hp ? String(r.motor_hp) : "",
+        material: r.material === "AL" ? "AL" : "CU",
+        in_raceway: Boolean(r.in_raceway),
+        kw: Number(r.kw || 0),
+        length_ft: Number(r.length_ft || 0),
+        continuous: Boolean(r.continuous)
+      });
+    }
+    return {
+      schema_version: 1,
+      saved_at: new Date().toISOString(),
+      project: (document.getElementById("project-title").value || "NEC Multi-Topology Electrical Design Schedule").trim(),
+      ambient_c: Number(document.getElementById("amb-c").value || 40),
+      max_vd: Number(document.getElementById("max-vd").value || 3.0),
+      auto_vd: document.getElementById("auto-vd").checked,
+      motor_ocpd_mode: document.getElementById("motor-ocpd-mode").value,
+      apply_bundle_derate: document.getElementById("apply-bundle-derate").checked,
+      feeder: {
+        topology: document.getElementById("feeder-topo").value,
+        scope: document.getElementById("feeder-scope").value,
+        material: document.getElementById("feeder-mat").value,
+        length_ft: Number(document.getElementById("feeder-ft").value || 150)
+      },
+      transformer: {
+        preset: document.getElementById("xfmr-preset").value,
+        phases: Number(document.getElementById("xfmr-ph").value || 3),
+        value: Number(document.getElementById("xfmr-val").value || 45),
+        unit: document.getElementById("xfmr-unit").value,
+        v_pri: Number(document.getElementById("xfmr-vpri").value || 480),
+        v_sec: Number(document.getElementById("xfmr-vsec").value || 208),
+        scheme: document.getElementById("xfmr-scheme").value,
+        material: document.getElementById("xfmr-mat").value,
+        z_pct: Number(document.getElementById("xfmr-zpct").value || 4.5)
+      },
+      rows: cleanRows
+    };
+  }
+
+  function saveSettingsLocal() {
+    try {
+      var snap = collectProjectData();
+      delete snap.rows;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(snap));
+    } catch (e) {}
+  }
+
+  function applySettingsFromObj(d) {
+    if (d === null || typeof d !== "object") return;
+    if (typeof d.project === "string" && d.project.trim() !== "") {
+      document.getElementById("project-title").value = d.project.trim();
+      try { localStorage.setItem(PROJ_KEY, d.project.trim()); } catch (e) {}
+    }
+    if (d.ambient_c !== undefined) document.getElementById("amb-c").value = String(d.ambient_c);
+    if (d.max_vd !== undefined) document.getElementById("max-vd").value = String(d.max_vd);
+    if (d.auto_vd !== undefined) document.getElementById("auto-vd").checked = Boolean(d.auto_vd);
+    if (d.motor_ocpd_mode === "fuse" || d.motor_ocpd_mode === "breaker") {
+      document.getElementById("motor-ocpd-mode").value = d.motor_ocpd_mode;
+    }
+    if (d.apply_bundle_derate !== undefined) {
+      document.getElementById("apply-bundle-derate").checked = Boolean(d.apply_bundle_derate);
+    }
+    if (d.feeder && typeof d.feeder === "object") {
+      if (TOPO[d.feeder.topology]) document.getElementById("feeder-topo").value = d.feeder.topology;
+      if (d.feeder.scope === "all" || d.feeder.scope === "checked") document.getElementById("feeder-scope").value = d.feeder.scope;
+      if (d.feeder.material === "CU" || d.feeder.material === "AL") document.getElementById("feeder-mat").value = d.feeder.material;
+      if (d.feeder.length_ft !== undefined) document.getElementById("feeder-ft").value = String(d.feeder.length_ft);
+    }
+    if (d.transformer && typeof d.transformer === "object") {
+      var x = d.transformer;
+      if (x.preset !== undefined) document.getElementById("xfmr-preset").value = String(x.preset);
+      if (String(x.phases) === "1" || String(x.phases) === "3") document.getElementById("xfmr-ph").value = String(x.phases);
+      if (x.value !== undefined) document.getElementById("xfmr-val").value = String(x.value);
+      if (x.unit === "kVA" || x.unit === "VA") document.getElementById("xfmr-unit").value = x.unit;
+      if (x.v_pri !== undefined) document.getElementById("xfmr-vpri").value = String(x.v_pri);
+      if (x.v_sec !== undefined) document.getElementById("xfmr-vsec").value = String(x.v_sec);
+      if (x.scheme === "pri_sec" || x.scheme === "pri_only") document.getElementById("xfmr-scheme").value = x.scheme;
+      if (x.material === "CU" || x.material === "AL") document.getElementById("xfmr-mat").value = x.material;
+      if (x.z_pct !== undefined) document.getElementById("xfmr-zpct").value = String(x.z_pct);
+    }
+  }
+
+  function loadSettingsLocal() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY) || localStorage.getItem("nec_standalone_settings_v11");
+      if (raw) applySettingsFromObj(JSON.parse(raw));
+    } catch (e) {}
+  }
+
+  document.getElementById("btn-save-json").onclick = function() {
+    var data = collectProjectData();
+    var slug = data.project.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 55) || "NEC_Panel_Project";
+    var now = new Date();
+    var stamp = String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0");
+    var fname = slug + "_" + stamp + ".json";
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8;" });
+    var a = document.createElement("a");
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    showNotice("Saved project archive: " + fname + " (" + data.rows.length + " rows)", false);
+  };
+
+  var loadFileInput = document.getElementById("file-load-json");
+  document.getElementById("btn-load-json").onclick = function() {
+    loadFileInput.value = "";
+    loadFileInput.click();
+  };
+
+  loadFileInput.onchange = function() {
+    if (this.files === null || this.files.length === 0) return;
+    var file = this.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var parsed = JSON.parse(String(ev.target.result || ""));
+        var incomingRows = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.rows) ? parsed.rows : null);
+        if (incomingRows === null || incomingRows.length === 0) {
+          throw new Error("File does not contain a valid NEC schedule 'rows' list.");
+        }
+        var sanitized = [];
+        for (var i = 0; i < incomingRows.length; i++) {
+          var r = incomingRows[i] || {};
+          var topo = TOPO[r.topology] ? r.topology : "3P/480VAC";
+          sanitized.push({
+            ref: String(r.ref || ("L" + (i + 1))),
+            name: String(r.name || ("Load " + (i + 1))),
+            topology: topo,
+            motor_hp: r.motor_hp ? String(r.motor_hp) : "",
+            material: String(r.material || "CU").toUpperCase() === "AL" ? "AL" : "CU",
+            in_raceway: Boolean(r.in_raceway),
+            kw: Number(r.kw || 0),
+            length_ft: Number(r.length_ft || 100),
+            continuous: r.continuous === undefined ? true : Boolean(r.continuous)
+          });
+        }
+        ROWS = sanitized;
+        if (Array.isArray(parsed) === false) applySettingsFromObj(parsed);
+        document.getElementById("global-mat").value = "";
+        recalc();
+        saveSettingsLocal();
+        var loadedName = (Array.isArray(parsed) === false && parsed.project) ? parsed.project : file.name;
+        showNotice("Loaded project: " + loadedName + " (" + ROWS.length + " circuits)", false);
+      } catch (err) {
+        showNotice("Could not load project JSON: " + err.message, true);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  loadSettingsLocal();
 
   document.getElementById("btn-csv").onclick = function() {
     var hdr = ["Ref,Description,Topology,Motor_HP,Material,kW,Feet,FLA,Design_A,OCPD_A,Wire_60C,Wire_75C,Wire_90C,Final_Wire,EGC_250_122,VD_Pct,EMT,Rigid_RMC,PVC40,AB_OL,SqD_OL"];
